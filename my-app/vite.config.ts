@@ -11,6 +11,7 @@ export default defineConfig({
     }),
   ],
   server: {
+    allowedHosts: ['devserver-main--naanaskitchen.netlify.app'],
     proxy: {
       '/api': 'http://localhost:5000',
     },

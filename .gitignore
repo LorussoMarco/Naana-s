@@ -1,1 +1,11 @@
 .env
+*.env
+node_modules
+backend/node_modules
+my-app/node_modules
+dist
+my-app/dist
+tmp
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*

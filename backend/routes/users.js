@@ -1,6 +1,6 @@
 const express = require('express');
 const supabase = require('../supabaseClient');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 
 // List users (email + created_at) — minimal fields per new schema

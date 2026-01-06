@@ -28,10 +28,12 @@ const Prodotti: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/items');
+        const res = await fetch(`${apiBase}/items`);
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
           // no items in DB

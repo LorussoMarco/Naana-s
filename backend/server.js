@@ -12,8 +12,15 @@ const contactRoutes = require('./routes/contact');
 
 const app = express();
 
-// Abilita CORS per frontend Vite (porta 5173)
-app.use(cors({ origin: 'http://localhost:5173' }));
+// Abilita CORS per frontend: legge domini da env CORS_ORIGINS (comma-separated), fallback localhost
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins,
+}));
 
 app.use(express.json());
 

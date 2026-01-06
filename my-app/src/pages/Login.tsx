@@ -12,6 +12,8 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -21,7 +23,7 @@ const Login: React.FC = () => {
     }
     setLoading(true);
     try {
-      const resp = await fetch('http://localhost:5000/api/auth/login', {
+      const resp = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

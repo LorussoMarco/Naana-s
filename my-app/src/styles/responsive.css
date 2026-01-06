@@ -1,0 +1,289 @@
+/* Global responsive utilities for mobile & tablet
+   - Adds container, responsive grid, image/video rules
+   - Typography scaling and common helpers
+   Keep this file minimal and progressively enhance existing component CSS. */
+
+:root {
+  --container-max: 1280px;
+  --gap: 1rem;
+}
+
+/* Page container: full-width on small screens, centered on larger */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .container { padding-left: 1.25rem; padding-right: 1.25rem; }
+}
+@media (min-width: 1024px) {
+  .container { padding-left: 2rem; padding-right: 2rem; }
+}
+
+/* Make images, svgs and media scale */
+img, picture, svg, video {
+  /*max-width: 100%;*/
+  height: auto;
+  display: block;
+}
+
+/* Responsive grid utility */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--gap);
+}
+
+/* Stack utility: column on mobile, row on wider screens */
+.stack {
+  display: flex;
+  gap: var(--gap);
+  flex-wrap: wrap;
+}
+.stack.column-mobile { flex-direction: column; }
+@media (min-width: 640px) { .stack.column-mobile { flex-direction: row; } }
+
+/* Header helpers */
+.header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.header-menu { display: flex; gap: 0.75rem; align-items: center; }
+@media (max-width: 640px) {
+  .header-menu { width: 100%; justify-content: space-around; }
+}
+
+/* Align the auth controls to the right on desktop while keeping
+   normal flow on mobile. We use a dedicated class applied in Header.tsx */
+.header-auth-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+@media (min-width: 640px) {
+  .header-auth-row {
+    position: absolute;
+    right: 1rem; /* match container padding */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 60;
+    white-space: nowrap;
+  }
+}
+
+/* Typographic scaling */
+h1 { font-size: clamp(1.6rem, 4.5vw, 3.2rem); }
+h2 { font-size: clamp(1.25rem, 3.5vw, 2rem); }
+h3 { font-size: clamp(1rem, 2.5vw, 1.5rem); }
+
+/* Card padding responsive */
+.card { padding: clamp(0.75rem, 2vw, 2rem); }
+
+/* Ensure forms and inputs expand on smaller screens */
+.form-input, input, textarea, select, .form-control { width: 100%; box-sizing: border-box; }
+
+/* Utility to hide/show on breakpoints.
+  Use !important to override inline styles set via React `style` prop. */
+.hide-mobile { display: none !important; }
+.show-mobile { display: block !important; }
+@media (min-width: 640px) { .hide-mobile { display: block !important; } .show-mobile { display: none !important; } }
+
+/* Compact auth buttons on narrow screens so they fit in header */
+@media (max-width: 640px) {
+  .header-auth-row { gap: 6px; }
+  .header-auth-row .auth-btn {
+    padding: 6px 8px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    margin-left: 6px !important;
+    min-width: 0 !important;
+  }
+  /* allow the auth row to remain in flow but avoid wrapping */
+  .header-auth-row { flex-wrap: nowrap; overflow: visible; }
+}
+
+/* Reduce #root/app padding on small screens (overrides App.css) */
+#root { padding-left: 1rem; padding-right: 1rem; }
+@media (min-width: 640px) { #root { padding-left: 2rem; padding-right: 2rem; } }
+
+/* Small utilities for alignment and responsive sizing */
+.center { display:flex; align-items:center; justify-content:center; }
+.gap-sm { gap: 0.5rem; }
+.gap-md { gap: 1rem; }
+
+/* Make tables horizontally scrollable on narrow screens */
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Keep long text from overflowing */
+.break-words { word-wrap: break-word; word-break: break-word; }
+
+/* Mobile nav toggle (hamburger) */
+.mobile-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.mobile-nav {
+  display: none;
+  width: 100%;
+}
+.mobile-nav.open {
+  display: block;
+}
+
+/* Style the stacked list when mobile nav is open */
+.mobile-nav ul {
+  list-style: none;
+  margin: 0.5rem 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.mobile-nav a { display: inline-block; padding: 8px 12px; border-radius: 8px; }
+
+@media (min-width: 640px) {
+  /* Force-hide the mobile toggle on desktop even if inline styles exist */
+  .mobile-toggle, .show-mobile { display: none !important; }
+  .mobile-nav { display: flex !important; width: auto; }
+  .mobile-nav ul { flex-direction: row; gap: 1rem; margin: 0; }
+
+  /* Restore desktop layout: place the nav centered inside the header (absolute)
+     so header buttons remain in the container and nav appears where it was before. */
+  .site-header .mobile-nav {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    width: auto;
+  }
+}
+
+/* Ensure the hamburger/close SVG scales nicely */
+.mobile-toggle svg { width: 20px; height: 20px; }
+
+/* Sticky-wrap buttons (homepage): center and match size on small screens */
+.sticky-wrap .menu-button { position: absolute; }
+
+@media (min-width: 641px) {
+  /* Ensure desktop keeps absolute-positioned buttons visible and styled */
+  .sticky-wrap .menu-button {
+    display: inline-block !important;
+    position: absolute !important;
+    z-index: 999 !important;
+    width: auto !important;
+    padding: 10px 16px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 40% !important;
+    text-align: center;
+  }
+
+  /* If there are two buttons, offset the second slightly to the right */
+  .sticky-wrap .menu-button.primary {
+    left: calc(50% + 140px) !important;
+    transform: translateX(-40%) !important;
+  }
+}
+
+/* Ensure the sticky background doesn't cover the buttons */
+.sticky-wrap .sticky-bg {
+  z-index: 0 !important;
+  pointer-events: none; /* allow clicks on buttons */
+}
+
+@media (max-width: 640px) {
+  .sticky-wrap {
+    /* Make the wrapper a centered stack with the blurred image as a
+       positioned background so buttons can sit in the visual center. */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 60vh; /* match the blurred background height */
+    /* move buttons slightly lower: increase top padding */
+    padding: 19.6rem 1rem 1.6rem 1rem; /* top right bottom left */
+    box-sizing: border-box;
+  }
+
+  /* Make both buttons full-width (up to a max) and same padding/size */
+  .sticky-wrap .menu-button {
+    /* keep buttons visually above the blurred background while
+       keeping a centered, touch-friendly size */
+    position: relative !important;
+    z-index: 20 !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    /* Narrower buttons on mobile but remain centered */
+    display: block !important;
+    width: 76% !important;
+    max-width: 360px !important;
+    padding: 12px 18px !important;
+    height: auto !important;
+    border-radius: 999px !important;
+    text-align: center;
+    box-sizing: border-box;
+    margin: 8px auto !important;
+  }
+
+  .sticky-wrap .menu-button.primary {
+    display: inline-block;
+  }
+
+  /* Ensure the blurred background sits behind the buttons in the flex stack */
+  .sticky-wrap .sticky-bg {
+    /* place the blurred background absolutely behind the buttons */
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    order: -1;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
+}
+
+/* When nav is open, style the mobile nav as a vertical full-width block */
+.site-header .mobile-nav.open {
+  display: block;
+  width: 100%;
+  background: var(--surface);
+  padding: 0.5rem 1rem;
+  box-shadow: 0 8px 30px rgba(16,24,40,0.06);
+  border-radius: 0 0 12px 12px;
+}
+.site-header .mobile-nav.open ul { flex-direction: column; }
+.site-header .mobile-nav.open a { width: 100%; text-align: left; padding: 0.75rem 1rem; }
+
+/* Make the hamburger more visible when nav is open */
+.site-header.nav-open .mobile-toggle {
+  background: var(--accent-ghost);
+  color: var(--accent-600);
+  box-shadow: 0 8px 20px var(--accent-ring);
+}
+.site-header.nav-open .mobile-toggle svg { width: 22px; height: 22px; }
+
+/* Slight hover for mobile nav items */
+.mobile-nav a:hover { background: rgba(16,24,40,0.03); }

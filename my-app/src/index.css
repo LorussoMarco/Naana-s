@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Typography */
+  --font-sans: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-serif: 'Playfair Display', 'Miller Banner', Georgia, serif;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Theme variables - refined palette */
+  --inkcloud: #1f2937; /* deep slate for text */
+  --muted: #f7f5f3; /* soft warm background */
+  --surface: #ffffff; /* card surface */
+
+  /* Accent (brand) */
+  --accent: #6d28d9; /* deep purple */
+  --accent-600: #7c3aed;
+  --accent-ghost: rgba(109,40,217,0.08);
+  --accent-ring: rgba(109,40,217,0.14);
+
+  --input-bg: #ffffff;
+  --input-text: #0f172a;
+  --placeholder: #94a3b8;
+
+  color-scheme: light;
+  color: var(--inkcloud);
+  background-color: var(--muted);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 600;
+  color: var(--inkcloud);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--accent-600);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(180deg, var(--muted), #fff);
+  font-family: var(--font-sans);
+}
+
+h1 {
+  font-family: var(--font-serif);
+  font-size: 3.2em;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--inkcloud);
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: rgba(16,24,40,0.06);
+}
+button.primary {
+  background: linear-gradient(90deg,var(--accent),var(--accent-600));
+  color: white;
+  border: none;
+  box-shadow: 0 8px 30px rgba(109,40,217,0.12);
+}
+button.primary:hover { transform: translateY(-1px); }
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Elegant, clean form controls used across the site */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input,
+textarea,
+select {
+  background: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--accent-ghost);
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.25;
+  box-shadow: 0 1px 2px rgba(16,24,40,0.03);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 60ms ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 6px 20px var(--accent-ring);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* smaller inputs (e.g., inline fields) */
+.input-sm {
+  padding: 0.325rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Helper class to apply the site input appearance when components
+   previously used inline styles. Keeps width:100% by default. */
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: var(--inkcloud);
+    background-color: var(--mossmilk);
+  }
+  a:hover {
+    color: var(--inkcloud);
+  }
+  button {
+    background-color: var(--inkcloud);
+  }
+}

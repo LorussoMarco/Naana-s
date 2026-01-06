@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Prodotti",
+    "about": "About",
+    "contact": "Contatti"
+  },
+  "auth": {
+    "login": "Accedi",
+    "logout": "Logout",
+    "accessing": "Accesso…",
+    "enter_email_password": "Inserisci email e password",
+    "login_error": "Errore durante il login",
+    "cannot_login": "Impossibile effettuare il login"
+  },
+  "header": {
+    "open_menu": "Apri menu",
+    "close_menu": "Chiudi menu",
+    "language": "Lingua",
+    "italian": "Italiano",
+    "english": "English"
+  },
+  "about": {
+    "title": "LA NOSTRA STORIA",
+    "lead": "Naana's Kitchen nasce dal desiderio di trasformare ogni tavola in un luogo di incontro, emozione e gusto.\n\nLa storia di due donne che, tra passione, coraggio e resilienza, hanno costruito un progetto — non solo di business ma una storia di identità e di visione.\n\nOggi Naana's Kitchen è specializzato in catering per eventi esclusivi, piccole celebrazioni, feste aziendali.\n\nNon cuciniamo solo per nutrire.\nCuciniamo per creare momenti.\nMomenti che profumano di calore, eleganza e autenticità.\n\nPiù che cucinare, creiamo momenti. Momenti che restano.",
+    "figure1": "Il nostro team al lavoro",
+    "figure2": "Cucina artigianale con ingredienti scelti",
+    "text": "THE TEAM\n\nDORIS - founder\nNERINA - co founder"
+  },
+  "contact": {
+    "title": "Contattaci",
+    "lead": "Per informazioni, preventivi o richieste speciali puoi usare i recapiti qui sotto o inviarci un messaggio.",
+    "office_title": "Sede Centrale",
+    "showroom_title": "Showroom Milano",
+    "hours_title": "Orari",
+    "social_title": "Social",
+    "form_title": "Invia un messaggio",
+    "name": "Nome",
+    "email": "Email",
+    "message": "Il tuo messaggio",
+    "submit": "Invia",
+    "sent_alert": "Messaggio inviato — grazie!",
+    "sent_error": "Errore nell'invio — riprova.",
+    "sending": "Invio in corso..."
+  }
+  ,
+  "homepage": {
+    "hero_title": "Naana's Kitchen",
+    "hero_lead": "Piatti freschi e presentazione curata per i tuoi eventi. Menu su misura con un tocco contemporaneo ed elegante.",
+    "view_products": "Vedi Prodotti",
+    "make_order": "Fai Ordinazione",
+    "close": "Chiudi",
+    "cover_title": "Il nostro menu",
+    "cover_text": "Scorri per scoprire le portate: il menu è pensato per eventi eleganti e su misura.",
+    "feature_title": "Cura e presentazione",
+    "feature_text": "Ogni piatto è pensato per sorprendere: ingredienti selezionati, impiattamento elegante e attenzione alle esigenze dei tuoi ospiti."
+  },
+  "stepper": {
+    "back": "Indietro",
+    "next": "Avanti",
+    "client_title": "Dati cliente",
+    "event_title": "Dettagli evento",
+    "address_title": "Indirizzo e consegna",
+    "client_name_placeholder": "Nome",
+    "client_last_placeholder": "Cognome",
+    "client_email_placeholder": "Email",
+    "client_phone_placeholder": "Numero di telefono",
+    "event_type_placeholder": "Tipo di evento",
+    "num_people_placeholder": "Numero di persone",
+    "budget_placeholder": "Budget massimo (€)",
+    "event_date_placeholder": "Data evento",
+    "event_message_placeholder": "Messaggio / Note per l'evento",
+    "street_placeholder": "Via",
+    "city_placeholder": "Città",
+    "zip_placeholder": "CAP",
+    "takeaway": "Take away",
+    "delivery": "Consegna (costo aggiuntivo)",
+    "sending": "Invio in corso...",
+    "order_created": "Ordine creato con successo!"
+  },
+  "validation": {
+    "fill_client_fields": "Compila Nome, Cognome, Email e Numero di telefono",
+    "invalid_email": "Inserisci un indirizzo email valido",
+    "invalid_phone": "Inserisci un numero di telefono valido",
+    "select_event_date": "Seleziona la data dell'evento",
+    "event_date_past": "La data evento non può essere antecedente ad oggi",
+    "select_delivery_type": "Seleziona il tipo di consegna",
+    "fill_address_fields": "Per la consegna compila via, città e CAP",
+    "zip_numeric": "Il CAP deve essere numerico",
+    "submit_error": "Errore invio"
+  }
+  ,
+  "product": {
+    "title": "Prodotti",
+    "loading": "Caricamento...",
+    "load_error": "Impossibile caricare i prodotti dal server.",
+    "cold_title": "Piatti Freddi",
+    "hot_title": "Piatti Caldi",
+    "dessert_title": "Dessert",
+    "default_name": "Prodotto"
+  }
+}

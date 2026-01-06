@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "accessing": "Signing in…",
+    "enter_email_password": "Enter email and password",
+    "login_error": "Error during login",
+    "cannot_login": "Unable to login"
+  },
+  "header": {
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "language": "Language",
+    "italian": "Italiano",
+    "english": "English"
+  },
+  "about": {
+    "title": "OUR STORY",
+    "lead": "Naana's Kitchen was born from the desire to transform every table into a place of connection, emotion and taste.\n\nThe story of two women who, through passion, courage and resilience, have built a project — not just a business but a story of identity and vision.\n\nToday Naana's Kitchen specializes in catering for exclusive events, small celebrations, corporate parties.\n\nWe don't just cook to nourish.\nWe cook to create moments.\nMoments that smell of warmth, elegance and authenticity.\n\nMore than cooking, we create moments. Moments that last.",
+    "figure1": "Our team at work",
+    "figure2": "Artisanal kitchen with selected ingredients",
+    "text": "THE TEAM\n\nDORIS - founder\nNERINA - co founder"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "lead": "For information, quotes or special requests use the contacts below or send us a message.",
+    "office_title": "Head Office",
+    "showroom_title": "Showroom Milan",
+    "hours_title": "Hours",
+    "social_title": "Social",
+    "form_title": "Send a message",
+    "name": "Name",
+    "email": "Email",
+    "message": "Your message",
+    "submit": "Send",
+    "sent_alert": "Message sent — thank you!",
+    "sent_error": "Error sending — please try again.",
+    "sending": "Sending..."
+  }
+  ,
+  "homepage": {
+    "hero_title": "Naana's Kitchen",
+    "hero_lead": "Fresh dishes and careful presentation for your events. Custom menus with a contemporary, elegant touch.",
+    "view_products": "View Products",
+    "make_order": "Make an Order",
+    "close": "Close",
+    "cover_title": "Our menu",
+    "cover_text": "Scroll to discover dishes: the menu is designed for elegant, tailored events.",
+    "feature_title": "Care and presentation",
+    "feature_text": "Every dish is designed to surprise: selected ingredients, elegant plating and attention to your guests' needs."
+  },
+  "stepper": {
+    "back": "Back",
+    "next": "Next",
+    "client_title": "Client details",
+    "event_title": "Event details",
+    "address_title": "Address & delivery",
+    "client_name_placeholder": "First name",
+    "client_last_placeholder": "Last name",
+    "client_email_placeholder": "Email",
+    "client_phone_placeholder": "Phone number",
+    "event_type_placeholder": "Type of event",
+    "num_people_placeholder": "Number of people",
+    "budget_placeholder": "Maximum budget (€)",
+    "event_date_placeholder": "Event date",
+    "event_message_placeholder": "Message / Notes",
+    "street_placeholder": "Street",
+    "city_placeholder": "City",
+    "zip_placeholder": "Postal code",
+    "takeaway": "Take away",
+    "delivery": "Delivery (extra cost)",
+    "sending": "Sending...",
+    "order_created": "Order created successfully!"
+  },
+  "validation": {
+    "fill_client_fields": "Fill First name, Last name, Email and Phone number",
+    "invalid_email": "Enter a valid email address",
+    "invalid_phone": "Enter a valid phone number",
+    "select_event_date": "Select the event date",
+    "event_date_past": "Event date cannot be earlier than today",
+    "select_delivery_type": "Select delivery type",
+    "fill_address_fields": "For delivery fill street, city and postal code",
+    "zip_numeric": "Postal code must be numeric",
+    "submit_error": "Error sending"
+  }
+  ,
+  "product": {
+    "title": "Products",
+    "loading": "Loading...",
+    "load_error": "Unable to load products from the server.",
+    "cold_title": "Cold Dishes",
+    "hot_title": "Hot Dishes",
+    "dessert_title": "Desserts",
+    "default_name": "Product"
+  }
+}

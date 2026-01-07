@@ -170,7 +170,7 @@ class Title {
         // increase fraction so text textures can span a much wider area
         // (closer to the card width). Use 0.95 to maximize text width on mobile
         // and prevent truncation.
-        maxTextWidth = Math.max(200, Math.floor(canvasEl.width * 0.95));
+        maxTextWidth = Math.max(200, Math.floor(canvasEl.width * 1.25));
       }
     } catch (err) {
       maxTextWidth = undefined;

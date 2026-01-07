@@ -171,7 +171,7 @@ class Title {
         const isMobile = window.innerWidth < 768;
         if (isMobile) {
           // Mobile: wider text canvas to prevent truncation
-          maxTextWidth = Math.max(300, Math.floor(canvasEl.width * 1.45));
+          maxTextWidth = Math.max(400, Math.floor(canvasEl.width * 1.75));
         } else {
           // Desktop: standard sizing
           maxTextWidth = Math.max(200, Math.floor(canvasEl.width * 0.75));

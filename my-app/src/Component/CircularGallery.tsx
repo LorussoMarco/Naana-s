@@ -167,10 +167,15 @@ class Title {
     try {
       const canvasEl = this.renderer.gl.canvas as HTMLCanvasElement;
       if (canvasEl && canvasEl.width) {
-        // increase fraction so text textures can span a much wider area
-        // (closer to the card width). Use 0.95 to maximize text width on mobile
-        // and prevent truncation.
-        maxTextWidth = Math.max(300, Math.floor(canvasEl.width * 1.45));
+        // Use different multipliers for mobile vs desktop
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+          // Mobile: wider text canvas to prevent truncation
+          maxTextWidth = Math.max(300, Math.floor(canvasEl.width * 1.45));
+        } else {
+          // Desktop: standard sizing
+          maxTextWidth = Math.max(200, Math.floor(canvasEl.width * 0.75));
+        }
       }
     } catch (err) {
       maxTextWidth = undefined;

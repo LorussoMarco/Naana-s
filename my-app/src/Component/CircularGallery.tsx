@@ -168,8 +168,9 @@ class Title {
       const canvasEl = this.renderer.gl.canvas as HTMLCanvasElement;
       if (canvasEl && canvasEl.width) {
         // increase fraction so text textures can span a much wider area
-        // (closer to the card width)
-        maxTextWidth = Math.max(200, Math.floor(canvasEl.width * 0.4));
+        // (closer to the card width). On small screens the previous 0.4
+        // made the text canvas too narrow and caused excessive wrapping.
+        maxTextWidth = Math.max(200, Math.floor(canvasEl.width * 0.85));
       }
     } catch (err) {
       maxTextWidth = undefined;

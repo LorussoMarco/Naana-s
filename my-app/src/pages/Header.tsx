@@ -6,16 +6,10 @@ type NavLink = { label: string; href: string };
 
 interface HeaderProps {
     title?: string;
-    links?: NavLink[];
-    logo?: React.ReactNode;
 }
 
 const Header: React.FC<HeaderProps> = ({
     title = "Naanas's Kitchen",
-    links,
-    // logo prop intentionally unused (we render a static asset logo)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    logo,
 }) => {
     const { t, i18n } = useTranslation();
     const [isAuthed, setIsAuthed] = useState(false);

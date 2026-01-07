@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import aImg from '../assets/a.png';
 import bImg from '../assets/b.jpg';
 import CircularGallery from '../Component/CircularGallery'
 

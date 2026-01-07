@@ -4,20 +4,6 @@ import bg from '../assets/b.jpg';
 import imgC from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
 
-const sections = [
-  { id: 'about', label: 'About' },
-  { id: 'gallery', label: 'Gallery' },
-  { id: 'menu', label: 'Menu' },
-  { id: 'contact', label: 'Contact' },
-];
-
-const galleryImages = [
-  '/images/catering-1.jpg',
-  '/images/catering-2.jpg',
-  '/images/catering-3.jpg',
-  '/images/catering-4.jpg',
-];
-
 const Homepage: React.FC = () => {
   const { t } = useTranslation();
   const [showStepper, setShowStepper] = useState(false);
@@ -45,11 +31,6 @@ const Homepage: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [stepError, setStepError] = useState<string | null>(null);
 
-  const scrollTo = (id: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
 
   const overlayStyle: React.CSSProperties = {
     position: 'fixed',

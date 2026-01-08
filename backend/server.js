@@ -41,6 +41,11 @@ app.get('/', (req, res) => {
   res.send('API is running');
 });
 
+// Health check endpoint - pubblico, leggero, per ping esterni
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);

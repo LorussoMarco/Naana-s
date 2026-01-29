@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import bImg from '../assets/b.jpg';
-import CircularGallery from '../Component/CircularGallery'
+// import CircularGallery from '../Component/CircularGallery'
 
 // NOTE: front-end will only display products coming from the backend `/api/items`.
 // The new DB schema stores images in `images` JSONB.
@@ -75,6 +75,64 @@ const Prodotti: React.FC = () => {
 
   const availableItems = items.filter(i => i.available);
 
+  /* ===== NUOVA GALLERIA ORIZZONTALE SEMPLICE ===== */
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const renderSimpleGallery = (title: string, list: Item[], ariaId: string) => {
+    if (!list || list.length === 0) {
+      return (
+        <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
+          <h2 id={ariaId} style={{ margin: '8px 0 12px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
+          <p style={{ textAlign: 'center', color: 'var(--inkcloud)' }}>Nessun prodotto disponibile</p>
+        </section>
+      );
+    }
+
+    return (
+      <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
+        <h2 id={ariaId} style={{ margin: '8px 0 24px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
+        <div className="gallery-wrapper">
+          <button className="gallery-arrow gallery-arrow-left" onClick={() => scroll('left')} aria-label="Scorri a sinistra">
+            ‹
+          </button>
+          <div className="simple-gallery" ref={scrollContainerRef}>
+            {list.map((item, idx) => (
+              <div key={item._id || idx} className="gallery-item">
+                <div className="gallery-image-wrapper">
+                  <img 
+                    src={(item.photos && item.photos[0] && item.photos[0].url) || bImg} 
+                    alt={item.name || 'Prodotto'} 
+                    className="gallery-image"
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="gallery-item-name">{item.name || 'Prodotto'}</h3>
+                {item.description && (
+                  <p className="gallery-item-desc">{item.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+          <button className="gallery-arrow gallery-arrow-right" onClick={() => scroll('right')} aria-label="Scorri a destra">
+            ›
+          </button>
+        </div>
+      </section>
+    );
+  };
+
+  /* ===== VECCHIA CIRCULAR GALLERY (COMMENTATA) ===== */
+  /*
   const renderStrip = (title: string, list: Item[], ariaId: string) => {
     // map Item -> { image, text } expected by CircularGallery
     const galleryItems = list && list.length
@@ -101,6 +159,7 @@ const Prodotti: React.FC = () => {
       </section>
     );
   };
+  */
 
   return (
     <div style={styles.container}>
@@ -111,6 +170,165 @@ const Prodotti: React.FC = () => {
 
       {/* Component-scoped CSS for elegant scrollbar and layout */}
       <style>{`
+        .gallery-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+          padding: 0 40px;
+        }
+
+        .gallery-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+          background: var(--inkcloud, #333);
+          color: white;
+          border: none;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          font-size: 28px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          transition: transform 0.2s, background 0.2s;
+        }
+
+        .gallery-arrow:hover {
+          transform: translateY(-50%) scale(1.1);
+          background: #555;
+        }
+
+        .gallery-arrow-left {
+          left: 0;
+        }
+
+        .gallery-arrow-right {
+          right: 0;
+        }
+
+        .simple-gallery {
+          display: flex;
+          gap: 24px;
+          padding: 20px 10px;
+          overflow-x: auto;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .simple-gallery::-webkit-scrollbar {
+          display: none;
+        }
+
+        .gallery-item {
+          flex: 0 0 280px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px;
+          background: var(--mossmilk, #f9f9f9);
+          border-radius: 16px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+          transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .gallery-item:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+        }
+
+        .gallery-image-wrapper {
+          width: 100%;
+          height: 200px;
+          overflow: hidden;
+          border-radius: 12px;
+          margin-bottom: 16px;
+        }
+
+        .gallery-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.3s;
+        }
+
+        .gallery-item:hover .gallery-image {
+          transform: scale(1.05);
+        }
+
+        .gallery-item-name {
+          margin: 0 0 8px 0;
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--inkcloud, #333);
+          text-align: center;
+        }
+
+        .gallery-item-desc {
+          margin: 0;
+          font-size: 14px;
+          color: var(--inkcloud, #666);
+          text-align: center;
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .gallery-wrapper {
+            padding: 0 30px;
+          }
+
+          .gallery-arrow {
+            width: 36px;
+            height: 36px;
+            font-size: 22px;
+          }
+
+          .gallery-item {
+            flex: 0 0 240px;
+            padding: 16px;
+          }
+
+          .gallery-image-wrapper {
+            height: 160px;
+          }
+
+          .gallery-item-name {
+            font-size: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .gallery-wrapper {
+            padding: 0 24px;
+          }
+
+          .gallery-arrow {
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+          }
+
+          .gallery-item {
+            flex: 0 0 200px;
+            padding: 12px;
+          }
+
+          .gallery-image-wrapper {
+            height: 140px;
+          }
+        }
+
+        /* Vecchi stili productStrip (commentati)
         .productStrip {
           display: flex;
           gap: 18px;
@@ -120,7 +338,6 @@ const Prodotti: React.FC = () => {
           scroll-behavior: smooth;
         }
 
-        /* Large minimal scrollbar for WebKit */
         .productStrip::-webkit-scrollbar {
           height: 12px;
         }
@@ -133,7 +350,6 @@ const Prodotti: React.FC = () => {
           border: 3px solid rgba(0,0,0,0.0);
         }
 
-        /* Firefox */
         .productStrip {
           scrollbar-width: thin;
           scrollbar-color: rgba(74,74,74,0.85) transparent;
@@ -175,9 +391,10 @@ const Prodotti: React.FC = () => {
           font-size: 13px;
           text-align: center;
         }
+        */
       `}</style>
 
-      {renderStrip(t('product.dishes_title'), availableItems, 'strip-dishes')}
+      {renderSimpleGallery(t('product.dishes_title'), availableItems, 'strip-dishes')}
     </div>
   );
 };

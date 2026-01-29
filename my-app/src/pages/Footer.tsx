@@ -9,8 +9,6 @@ const Footer: React.FC = () => {
         <p style={styles.copy}>© {new Date().getFullYear()} Catering Site</p>
 
         <nav aria-label="Footer navigation" style={styles.nav}>
-          <a href="/privacy" style={styles.link}>Privacy</a>
-          <a href="/terms" style={styles.link}>Terms</a>
           <a href="/contact" style={styles.link}>{t('nav.contact')}</a>
         </nav>
 

@@ -94,9 +94,7 @@
     "title": "Products",
     "loading": "Loading...",
     "load_error": "Unable to load products from the server.",
-    "cold_title": "Cold Dishes",
-    "hot_title": "Hot Dishes",
-    "dessert_title": "Desserts",
+    "dishes_title": "Our Dishes",
     "default_name": "Product"
   }
 }

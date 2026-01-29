@@ -5,7 +5,6 @@ type Item = {
   id?: string;
   name: string;
   available?: boolean;
-  type?: 'hot' | 'cold' | 'dessert' | 'altro';
   description?: string | null;
   images?: any[];
 };
@@ -55,8 +54,7 @@ const EditProducts: React.FC = () => {
     if (!query) return true;
     const q = query.toLowerCase();
     return (i.name || '').toLowerCase().includes(q)
-      || (i.description || '').toLowerCase().includes(q)
-      || (i.type || '').toLowerCase().includes(q);
+      || (i.description || '').toLowerCase().includes(q);
   });
 
   async function removeItem(id: string) {
@@ -125,7 +123,7 @@ const EditProducts: React.FC = () => {
   }
 
   function startNew() {
-    setEditing({ id: '', name: '', available: true, type: 'hot', description: null });
+    setEditing({ id: '', name: '', available: true, description: null });
   }
 
   return (
@@ -152,7 +150,6 @@ const EditProducts: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 12, background: '#fff', borderRadius: 8, boxShadow: '0 6px 18px rgba(2,6,23,0.04)' }}>
                 <div>
                   <div style={{ fontWeight: 700 }}>{it.name}</div>
-                  <div style={{ fontSize: 13, color: '#666' }}>{it.type || '-'}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <div style={{ fontSize: 13, color: '#666' }}>{it.available ? 'Disponibile' : 'Non disponibile'}</div>
@@ -209,7 +206,6 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
     const form = new FormData();
     form.append('name', editing.name || '');
     form.append('available', editing.available ? 'true' : 'false');
-    form.append('type', editing.type || 'hot');
     form.append('description', editing.description ?? '');
 
     const kept = existingImages.filter(u => !removedUrls.includes(u));
@@ -236,15 +232,6 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 6 }}>Disponibile</label>
         <input type="checkbox" checked={!!editing.available} onChange={e => setEditing({ ...editing, available: e.target.checked })} />
-      </div>
-      <div style={{ marginBottom: 12 }}>
-        <label style={{ display: 'block', marginBottom: 6 }}>Tipo</label>
-        <select value={editing.type || 'hot'} onChange={e => setEditing({ ...editing, type: e.target.value as any })} className="form-input">
-          <option value="hot">hot</option>
-          <option value="cold">cold</option>
-          <option value="dessert">dessert</option>
-          <option value="altro">altro</option>
-        </select>
       </div>
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 6 }}>Descrizione</label>

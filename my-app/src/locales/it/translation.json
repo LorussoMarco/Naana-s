@@ -94,9 +94,7 @@
     "title": "Prodotti",
     "loading": "Caricamento...",
     "load_error": "Impossibile caricare i prodotti dal server.",
-    "cold_title": "Piatti Freddi",
-    "hot_title": "Piatti Caldi",
-    "dessert_title": "Dessert",
+    "dishes_title": "I Nostri Piatti",
     "default_name": "Prodotto"
   }
 }

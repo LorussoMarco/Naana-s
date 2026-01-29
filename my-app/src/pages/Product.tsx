@@ -4,8 +4,8 @@ import bImg from '../assets/b.jpg';
 import CircularGallery from '../Component/CircularGallery'
 
 // NOTE: front-end will only display products coming from the backend `/api/items`.
-// The new DB schema stores images in `images` JSONB and may include `type` or `category`.
-// This component maps API items into the shape used by the UI and filters by category: 'cold'|'hot'|'dessert'.
+// The new DB schema stores images in `images` JSONB.
+// This component maps API items into the shape used by the UI and displays all dishes.
 
 interface Photo {
   url: string;
@@ -18,7 +18,6 @@ interface Item {
   description: string;
   photos: Photo[];
   available: boolean;
-  category?: 'cold' | 'hot' | 'dessert';
 }
 
 const Prodotti: React.FC = () => {
@@ -41,15 +40,12 @@ const Prodotti: React.FC = () => {
           const mapped: Item[] = data.map((d: any) => {
             const imagesSource = Array.isArray(d.images) ? d.images : Array.isArray(d.photos) ? d.photos : [];
             const photos: Photo[] = imagesSource.length ? imagesSource.map((p: any) => ({ url: p.url || p })) : [{ url: bImg }];
-            const rawCategory = (d.type || d.category || (d.tags && Array.isArray(d.tags) && d.tags[0]) || '').toString().toLowerCase();
-            const category = ['cold', 'hot', 'dessert'].includes(rawCategory) ? (rawCategory as 'cold'|'hot'|'dessert') : undefined;
             return {
               _id: d.id ? String(d.id) : (d._id ? String(d._id) : ''),
               name: d.name || '',
               description: d.description || '',
               photos,
               available: typeof d.available === 'boolean' ? d.available : true,
-              category,
             };
           });
           // Deduplicate by _id in case backend returns duplicates or different representations
@@ -77,9 +73,7 @@ const Prodotti: React.FC = () => {
 
   if (loading) return <p>{t('product.loading')}</p>;
 
-  const coldItems = items.filter(i => i.category === 'cold' && i.available);
-  const hotItems = items.filter(i => i.category === 'hot' && i.available);
-  const dessertItems = items.filter(i => i.category === 'dessert' && i.available);
+  const availableItems = items.filter(i => i.available);
 
   const renderStrip = (title: string, list: Item[], ariaId: string) => {
     // map Item -> { image, text } expected by CircularGallery
@@ -183,9 +177,7 @@ const Prodotti: React.FC = () => {
         }
       `}</style>
 
-      {renderStrip(t('product.cold_title'), coldItems, 'strip-cold')}
-      {renderStrip(t('product.hot_title'), hotItems, 'strip-hot')}
-      {renderStrip(t('product.dessert_title'), dessertItems, 'strip-dessert')}
+      {renderStrip(t('product.dishes_title'), availableItems, 'strip-dishes')}
     </div>
   );
 };

@@ -2,14 +2,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 const Footer: React.FC = () => {
-  const { t } = useTranslation();
+  const { } = useTranslation();
   return (
     <footer style={styles.footer}>
       <div style={styles.container} className="container">
         <p style={styles.copy}>© {new Date().getFullYear()} Catering Site</p>
 
         <nav aria-label="Footer navigation" style={styles.nav}>
-          <a href="/contact" style={styles.link}>{t('nav.contact')}</a>
         </nav>
 
         <div style={styles.made} aria-hidden>

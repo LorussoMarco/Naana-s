@@ -25,6 +25,7 @@ const Prodotti: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -76,7 +77,6 @@ const Prodotti: React.FC = () => {
   const availableItems = items.filter(i => i.available);
 
   /* ===== NUOVA GALLERIA ORIZZONTALE SEMPLICE ===== */
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {

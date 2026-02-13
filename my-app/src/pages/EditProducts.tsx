@@ -6,6 +6,7 @@ type Item = {
   name: string;
   available?: boolean;
   description?: string | null;
+  category?: string | null;
   images?: any[];
 };
 
@@ -123,7 +124,7 @@ const EditProducts: React.FC = () => {
   }
 
   function startNew() {
-    setEditing({ id: '', name: '', available: true, description: null });
+    setEditing({ id: '', name: '', available: true, description: null, category: null });
   }
 
   return (
@@ -207,6 +208,7 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
     form.append('name', editing.name || '');
     form.append('available', editing.available ? 'true' : 'false');
     form.append('description', editing.description ?? '');
+    form.append('category', editing.category ?? '');
 
     const kept = existingImages.filter(u => !removedUrls.includes(u));
     // Store kept images as a separate field to avoid mixing JSON with File objects
@@ -234,6 +236,22 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 6 }}>Descrizione</label>
         <textarea value={editing.description ?? ''} onChange={e => setEditing({ ...editing, description: e.target.value })} className="form-input" />
+      </div>
+      
+      <div style={{ marginBottom: 12 }}>
+        <label style={{ display: 'block', marginBottom: 6 }}>Categoria</label>
+        <select 
+          value={editing.category ?? ''} 
+          onChange={e => setEditing({ ...editing, category: e.target.value || null })} 
+          className="form-input"
+          style={{ cursor: 'pointer' }}
+        >
+          <option value="">-- Seleziona categoria --</option>
+          <option value="carne">Carne</option>
+          <option value="pesce">Pesce</option>
+          <option value="vegetariano">Vegetariano</option>
+          <option value="dessert">Dessert</option>
+        </select>
       </div>
 
       <div style={{ marginBottom: 12 }}>

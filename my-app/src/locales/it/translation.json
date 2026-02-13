@@ -48,7 +48,7 @@
     "hero_title": "Naana's Kitchen",
     "hero_lead": "Piatti freschi e presentazione curata per le tue cene ed i tuoi eventi. Menu su misura con un tocco contemporaneo ed elegante.",
     "view_products": "Vedi Prodotti",
-    "make_order": "Fai Ordinazione",
+    "make_order": "Contattaci",
     "close": "Chiudi",
     "cover_title": "Il nostro menu",
     "cover_text": "Scorri per scoprire le portate: il menu è pensato per eventi eleganti e su misura.",
@@ -94,7 +94,7 @@
     "title": "Prodotti",
     "loading": "Caricamento...",
     "load_error": "Impossibile caricare i prodotti dal server.",
-    "dishes_title": "I Nostri Piatti",
+    "dishes_title": "Fingerfood & Canapès",
     "default_name": "Prodotto"
   },
   "reviews": {

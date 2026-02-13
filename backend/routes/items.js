@@ -110,10 +110,13 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
       }
     }
 
+    const category = payload.category || null;
+
     const itemPayload = {
       name,
       available,
       description,
+      category,
       images: imagesArray
     };
 
@@ -173,10 +176,12 @@ router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
     }
 
     // Build final update payload
+    const category = payload.category || null;
     const itemPayload = {
       name,
       available,
       description,
+      category,
       images: imagesArray
     };
 

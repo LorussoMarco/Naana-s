@@ -48,7 +48,7 @@
     "hero_title": "Naana's Kitchen",
     "hero_lead": "Fresh dishes and careful presentation for your dinners and events. Custom menus with a contemporary, elegant touch.",
     "view_products": "View Products",
-    "make_order": "Make an Order",
+    "make_order": "Contact Us",
     "close": "Close",
     "cover_title": "Our menu",
     "cover_text": "Scroll to discover dishes: the menu is designed for elegant, tailored events.",
@@ -94,7 +94,7 @@
     "title": "Products",
     "loading": "Loading...",
     "load_error": "Unable to load products from the server.",
-    "dishes_title": "Our Dishes",
+    "dishes_title": "Fingerfood & Canapès",
     "default_name": "Product"
   },
   "reviews": {

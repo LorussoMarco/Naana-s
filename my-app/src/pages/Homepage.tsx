@@ -842,7 +842,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     left: '50%',
     transform: 'translateX(-50%)',
     background: 'rgba(255,255,255,0.9)',
-    color: 'var(--accent-600)',
+    color: 'black',
     padding: '12px 18px',
     borderRadius: 999,
     textDecoration: 'none',

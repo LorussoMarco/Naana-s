@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import bg from '../assets/d.jpg';
 import imgC from '../assets/c.jpg';
-import home1 from '../assets/home1.jpg';
-import home2 from '../assets/home2.jpg';
+import home3 from '../assets/home3.jpg';
 import bImg from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
 
@@ -188,8 +187,6 @@ const Homepage: React.FC = () => {
       {/* Sticky blurred background image: stays in place while sections scroll over it */}
       <div style={styles.stickyWrap} className="sticky-wrap">
         <div style={styles.stickyBgContainer} className="sticky-bg">
-          <div style={styles.stickyBgImage1} />
-          <div style={styles.stickyBgImage2} />
         </div>
         <button
           onClick={() => setShowStepper(true)}
@@ -772,31 +769,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     overflow: 'hidden',
   },
   stickyBgContainer: {
-    position: 'sticky',
-    top: 72,
-    height: '60vh',
-    width: '100%',
-    zIndex: 0,
-    pointerEvents: 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    gap: 0,
+    position: 'absolute' as const,
+    inset: 0,
+    backgroundImage: `url(${home3})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
   },
   stickyBgImage1: {
-    flex: 1,
-    height: '100%',
-    backgroundImage: `url(${home1})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    display: 'none',
   },
   stickyBgImage2: {
-    flex: 1,
-    height: '100%',
-    backgroundImage: `url(${home2})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    display: 'none',
   },
   stickyWrap: {
     position: 'relative',

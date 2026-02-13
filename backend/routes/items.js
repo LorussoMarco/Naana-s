@@ -91,17 +91,29 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
 
     // Upload files if any
     if (req.files && req.files.length) {
+      console.log(`[POST /items] Uploading ${req.files.length} files to bucket "${bucket}"`);
+      
       for (const file of req.files) {
-        const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const filename = `${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
-        const filePath = `items/${filename}`;
+        try {
+          const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const filename = `${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
+          const filePath = `items/${filename}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file.buffer, { contentType: file.mimetype });
-        if (uploadError) {
-          return res.status(500).json({ error: 'Failed to upload file to storage', details: uploadError.message || uploadError });
+          console.log(`[POST /items] Uploading file: ${filePath}`);
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file.buffer, { contentType: file.mimetype });
+          
+          if (uploadError) {
+            console.error(`[POST /items] Upload error for ${filePath}:`, uploadError);
+            return res.status(500).json({ error: 'Failed to upload file to storage', details: uploadError.message || JSON.stringify(uploadError) });
+          }
+
+          console.log(`[POST /items] File uploaded successfully: ${filePath}`);
+          imagesArray.push(filePath);
+        } catch (fileError) {
+          console.error(`[POST /items] Exception uploading file:`, fileError);
+          return res.status(500).json({ error: 'Exception during file upload', details: fileError.message });
         }
-
-        imagesArray.push(filePath);
       }
     }
 
@@ -112,13 +124,17 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
       images: imagesArray
     };
 
+    console.log(`[POST /items] Creating item with payload:`, itemPayload);
+
     const { data, error } = await supabase.from('items').insert([itemPayload]).select().single();
     if (error) {
-      return res.status(500).json({ error: 'Failed to insert item', details: error.message || error });
+      console.error(`[POST /items] Database insert error:`, error);
+      return res.status(500).json({ error: 'Failed to insert item', details: error.message || JSON.stringify(error) });
     }
     res.status(201).json(data);
   } catch (e) {
-    res.status(500).json({ error: 'Unexpected server error', details: e && e.message ? e.message : e });
+    console.error(`[POST /items] Unexpected server error:`, e);
+    res.status(500).json({ error: 'Unexpected server error', details: e && e.message ? e.message : JSON.stringify(e) });
   }
 });
 
@@ -148,15 +164,29 @@ router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
 
     // Upload new files and append to images array
     if (req.files && req.files.length) {
+      console.log(`[PUT /items/${id}] Uploading ${req.files.length} files to bucket "${bucket}"`);
+      
       for (const file of req.files) {
-        const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const filename = `${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
-        const filePath = `items/${filename}`;
+        try {
+          const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const filename = `${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
+          const filePath = `items/${filename}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file.buffer, { contentType: file.mimetype });
-        if (uploadError) return res.status(500).json({ error: uploadError.message || uploadError });
+          console.log(`[PUT /items/${id}] Uploading file: ${filePath}`);
 
-        imagesArray.push(filePath);
+          const { data: uploadData, error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file.buffer, { contentType: file.mimetype });
+          
+          if (uploadError) {
+            console.error(`[PUT /items/${id}] Upload error for ${filePath}:`, uploadError);
+            return res.status(500).json({ error: uploadError.message || uploadError });
+          }
+
+          console.log(`[PUT /items/${id}] File uploaded successfully: ${filePath}`);
+          imagesArray.push(filePath);
+        } catch (fileError) {
+          console.error(`[PUT /items/${id}] Exception uploading file:`, fileError);
+          return res.status(500).json({ error: fileError.message });
+        }
       }
     }
 
@@ -168,10 +198,16 @@ router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
       images: imagesArray
     };
 
+    console.log(`[PUT /items/${id}] Updating item with payload:`, itemPayload);
+
     const { data, error } = await supabase.from('items').update(itemPayload).eq('id', id).select().single();
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      console.error(`[PUT /items/${id}] Database update error:`, error);
+      return res.status(500).json({ error: error.message });
+    }
     res.json(data);
   } catch (e) {
+    console.error(`[PUT /items/${id}] Unexpected server error:`, e);
     res.status(500).json({ error: e.message });
   }
 });

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import bg from '../assets/d.jpg';
 import imgC from '../assets/b.jpg';
-import imgD from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
 
 const Homepage: React.FC = () => {
@@ -337,11 +336,14 @@ const Homepage: React.FC = () => {
         </div>
       )}
 
-      {/* Cover section: top image (d.jpg blurred), middle image (b.jpg), bottom image (c.jpg) */}
+      {/* Cover section: left half image (uses a.png), right half title + description.
+          When this section scrolls into view it will overlay the blurred background. */}
       <section id="cover" style={styles.coverSection}>
         <div style={styles.coverLeft} />
-        <div style={styles.coverBottom} />
-        <div style={styles.coverBottomTwo} />
+        <div style={styles.coverRight}>
+          <h2 style={styles.coverTitle}>{t('homepage.cover_title')}</h2>
+          <p style={styles.coverText}>{t('homepage.cover_text')}</p>
+        </div>
       </section>
 
       <section id="feature" style={styles.featureSection}>
@@ -547,9 +549,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   coverSection: {
     display: 'grid',
-    gridTemplateColumns: '1fr',
-    gridTemplateRows: '1fr 1fr 1fr',
-    minHeight: '150vh',
+    gridTemplateColumns: '1fr 1fr',
+    minHeight: '70vh',
     alignItems: 'stretch',
     position: 'relative',
     zIndex: 15,
@@ -558,28 +559,27 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundImage: `url(${bg})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    filter: 'blur(4px)',
-    minHeight: '33vh',
-  },
-  coverBottom: {
-    backgroundImage: `url(${imgC})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
     filter: 'none',
-    minHeight: '33vh',
   },
-  coverBottomTwo: {
-    backgroundImage: `url(${imgD})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    filter: 'none',
-    minHeight: '33vh',
+  coverRight: {
+    padding: '48px 32px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    background: 'linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85))',
+    borderRadius: 12,
+    boxShadow: '0 12px 40px rgba(16,24,40,0.06)',
   },
   coverTitle: {
-    display: 'none',
+    margin: 0,
+    fontSize: 28,
+    fontWeight: 700,
   },
   coverText: {
-    display: 'none',
+    marginTop: 12,
+    color: 'var(--inkcloud)',
+    fontSize: 16,
+    maxWidth: 520,
   },
 };
 

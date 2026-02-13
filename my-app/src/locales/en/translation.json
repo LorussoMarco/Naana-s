@@ -96,5 +96,9 @@
     "load_error": "Unable to load products from the server.",
     "dishes_title": "Our Dishes",
     "default_name": "Product"
+  },
+  "reviews": {
+    "title": "What Our Guests Say",
+    "subtitle": "Real experiences from our events"
   }
 }

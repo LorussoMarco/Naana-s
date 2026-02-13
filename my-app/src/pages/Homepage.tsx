@@ -194,11 +194,7 @@ const Homepage: React.FC = () => {
         <button
           onClick={() => setShowStepper(true)}
           className="primary menu-button"
-          style={{
-            ...styles.menuButton,
-            left: '50%',
-            transform: 'translateX(-50%)',
-          }}
+          style={styles.menuButton}
         >
           {t('homepage.make_order')}
         </button>
@@ -624,13 +620,6 @@ const Homepage: React.FC = () => {
         }
       `}</style>
 
-      <div style={{ padding: '20px' }}>
-        {productsError && !productsLoading && (
-          <p style={{ color: 'var(--inkcloud)', textAlign: 'center', marginBottom: 18 }}>{productsError}</p>
-        )}
-        {!productsLoading && renderSimpleGallery(t('product.dishes_title'), items.filter(i => i.available), 'homepage-strip-dishes')}
-      </div>
-
       <section id="feature" style={styles.featureSection}>
         <div style={styles.featureLeft}>
           <h3 style={styles.featureTitle}>{t('homepage.feature_title')}</h3>
@@ -638,6 +627,61 @@ const Homepage: React.FC = () => {
         </div>
 
         <div style={styles.featureRight} />
+      </section>
+
+      <div style={{ padding: '20px' }}>
+        {productsError && !productsLoading && (
+          <p style={{ color: 'var(--inkcloud)', textAlign: 'center', marginBottom: 18 }}>{productsError}</p>
+        )}
+        {!productsLoading && renderSimpleGallery(t('product.dishes_title'), items.filter(i => i.available), 'homepage-strip-dishes')}
+      </div>
+
+      {/* Reviews Section */}
+      <section id="reviews" style={styles.reviewsSection}>
+        <div style={styles.reviewsContainer}>
+          <h2 style={styles.reviewsTitle}>{t('reviews.title')}</h2>
+          <p style={styles.reviewsSubtitle}>{t('reviews.subtitle')}</p>
+          
+          <div style={styles.reviewsGrid}>
+            {[
+              {
+                name: 'Francesca M.',
+                role: 'Wedding Event',
+                text: 'Naana\'s Kitchen ha trasformato il nostro matrimonio in un\'esperienza indimenticabile. Ogni piatto era una sorpresa, ogni dettaglio perfetto.',
+                rating: 5
+              },
+              {
+                name: 'Marco L.',
+                role: 'Corporate Event',
+                text: 'Professionalità, eleganza e gusto eccezionale. I nostri ospiti ancora ne parlano. Consigliatissimo per eventi aziendali.',
+                rating: 5
+              },
+              {
+                name: 'Elena R.',
+                role: 'Intimate Dinner',
+                text: 'Un\'esperienza culinaria che va oltre il semplice catering. Dori e Nerina creano arte in ogni piatto.',
+                rating: 5
+              },
+              {
+                name: 'Paolo T.',
+                role: 'Birthday Celebration',
+                text: 'Dalla prima consultazione al giorno dell\'evento, tutto è stato curato nei minimi dettagli. Grazie Naana\'s Kitchen!',
+                rating: 5
+              }
+            ].map((review, idx) => (
+              <div key={idx} style={styles.reviewCard}>
+                <div style={styles.reviewRating}>
+                  {Array(review.rating).fill(0).map((_, i) => (
+                    <span key={i} style={{ color: '#d4a574', fontSize: 16, marginRight: 2 }}>★</span>
+                  ))}
+                </div>
+                <p style={styles.reviewText}>"{review.text}"</p>
+                <p style={styles.reviewAuthor}>{review.name}</p>
+                <p style={styles.reviewRole}>{review.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
     </main>
@@ -758,7 +802,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'relative',
     height: '60vh',
     width: '100%',
-    display: 'block',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   section: {
     padding: '56px 16px',
@@ -892,6 +938,69 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'var(--inkcloud)',
     fontSize: 16,
     maxWidth: 520,
+  },
+  reviewsSection: {
+    padding: '64px 16px',
+    background: 'linear-gradient(180deg, rgba(212,165,116,0.05), rgba(212,165,116,0.02))',
+    position: 'relative',
+    zIndex: 10,
+  },
+  reviewsContainer: {
+    maxWidth: '1100px',
+    margin: '0 auto',
+  },
+  reviewsTitle: {
+    textAlign: 'center',
+    fontSize: 32,
+    fontWeight: 700,
+    color: 'var(--inkcloud)',
+    margin: '0 0 12px 0',
+  },
+  reviewsSubtitle: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: 'var(--inkcloud)',
+    marginBottom: 40,
+    opacity: 0.8,
+  },
+  reviewsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: 24,
+  },
+  reviewCard: {
+    background: 'white',
+    padding: '28px',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(74,74,74,0.08)',
+    transition: 'transform 0.3s, box-shadow 0.3s',
+    border: '1px solid rgba(212,165,116,0.1)',
+    display: 'flex',
+    flexDirection: 'column',
+  } as React.CSSProperties,
+  reviewRating: {
+    marginBottom: 12,
+    display: 'flex',
+  },
+  reviewText: {
+    fontSize: 15,
+    color: 'var(--inkcloud)',
+    lineHeight: 1.6,
+    fontStyle: 'italic',
+    margin: '0 0 16px 0',
+    flex: 1,
+  },
+  reviewAuthor: {
+    fontSize: 15,
+    fontWeight: 700,
+    color: 'var(--inkcloud)',
+    margin: '0 0 4px 0',
+  },
+  reviewRole: {
+    fontSize: 12,
+    color: 'var(--inkcloud)',
+    opacity: 0.7,
+    margin: 0,
   },
 };
 

@@ -96,5 +96,9 @@
     "load_error": "Impossibile caricare i prodotti dal server.",
     "dishes_title": "I Nostri Piatti",
     "default_name": "Prodotto"
+  },
+  "reviews": {
+    "title": "Quello che dicono i nostri ospiti",
+    "subtitle": "Esperienze reali dai nostri eventi"
   }
 }

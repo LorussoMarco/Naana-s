@@ -1,14 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import bg from '../assets/d.jpg';
 import imgC from '../assets/c.jpg';
 import home1 from '../assets/home1.jpg';
 import home2 from '../assets/home2.jpg';
+import bImg from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
+
+interface Photo {
+  url: string;
+  caption?: string;
+}
+
+interface Item {
+  _id: string;
+  name: string;
+  description: string;
+  photos: Photo[];
+  available: boolean;
+}
 
 const Homepage: React.FC = () => {
   const { t } = useTranslation();
   const [showStepper, setShowStepper] = useState(false);
+  
+  // Products state
+  const [items, setItems] = useState<Item[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
   // Step 1 - client
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -27,6 +48,54 @@ const Homepage: React.FC = () => {
   const [city, setCity] = useState('');
   const [zip, setZip] = useState('');
   const [deliveryType, setDeliveryType] = useState<'takeaway' | 'delivery'>('takeaway');
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [stepError, setStepError] = useState<string | null>(null);
+
+  // Fetch products on mount
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const res = await fetch(`${apiBase}/items`);
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          setItems([]);
+        } else {
+          const mapped: Item[] = data.map((d: any) => {
+            const imagesSource = Array.isArray(d.images) ? d.images : Array.isArray(d.photos) ? d.photos : [];
+            const photos: Photo[] = imagesSource.length ? imagesSource.map((p: any) => ({ url: p.url || p })) : [{ url: bImg }];
+            return {
+              _id: d.id ? String(d.id) : (d._id ? String(d._id) : ''),
+              name: d.name || '',
+              description: d.description || '',
+              photos,
+              available: typeof d.available === 'boolean' ? d.available : true,
+            };
+          });
+          const uniqueMap = new Map<string, Item>();
+          for (const it of mapped) {
+            if (!it._id) continue;
+            if (!uniqueMap.has(it._id)) uniqueMap.set(it._id, it);
+          }
+          const unique = Array.from(uniqueMap.values());
+          if (unique.length !== mapped.length) {
+            console.debug('Product dedupe: removed', mapped.length - unique.length, 'duplicates');
+          }
+          setItems(unique);
+        }
+        setProductsLoading(false);
+      } catch (err: any) {
+        console.error(err);
+        setProductsError(t('product.load_error'));
+        setItems([]);
+        setProductsLoading(false);
+      }
+    };
+    fetchItems();
+  }, [t]);
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -56,6 +125,59 @@ const Homepage: React.FC = () => {
     padding: 0,
   };
 
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const renderSimpleGallery = (title: string, list: Item[], ariaId: string) => {
+    if (!list || list.length === 0) {
+      return (
+        <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
+          <h2 id={ariaId} style={{ margin: '8px 0 12px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
+          <p style={{ textAlign: 'center', color: 'var(--inkcloud)' }}>Nessun prodotto disponibile</p>
+        </section>
+      );
+    }
+
+    return (
+      <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
+        <h2 id={ariaId} style={{ margin: '8px 0 24px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
+        <div className="homepage-gallery-wrapper">
+          <button className="homepage-gallery-arrow homepage-gallery-arrow-left" onClick={() => scroll('left')} aria-label="Scorri a sinistra">
+            ‹
+          </button>
+          <div className="homepage-simple-gallery" ref={scrollContainerRef}>
+            {list.map((item, idx) => (
+              <div key={item._id || idx} className="homepage-gallery-item">
+                <div className="homepage-gallery-image-wrapper">
+                  <img 
+                    src={(item.photos && item.photos[0] && item.photos[0].url) || bImg} 
+                    alt={item.name || 'Prodotto'} 
+                    className="homepage-gallery-image"
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="homepage-gallery-item-name">{item.name || 'Prodotto'}</h3>
+                {item.description && (
+                  <p className="homepage-gallery-item-desc">{item.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+          <button className="homepage-gallery-arrow homepage-gallery-arrow-right" onClick={() => scroll('right')} aria-label="Scorri a destra">
+            ›
+          </button>
+        </div>
+      </section>
+    );
+  };
+
   return (
     <main style={styles.root}>
       <header style={styles.hero}>
@@ -75,16 +197,13 @@ const Homepage: React.FC = () => {
           <div style={styles.stickyBgImage1} />
           <div style={styles.stickyBgImage2} />
         </div>
-        <a href="/product" style={styles.menuButton} className="menu-button">
-          {t('homepage.view_products')}
-        </a>
         <button
           onClick={() => setShowStepper(true)}
           className="primary menu-button"
           style={{
             ...styles.menuButton,
-            left: 'calc(50% + 140px)',
-            transform: 'translateX(-40%)',
+            left: '50%',
+            transform: 'translateX(-50%)',
           }}
         >
           {t('homepage.make_order')}
@@ -350,6 +469,173 @@ const Homepage: React.FC = () => {
           <p style={styles.coverText}>{t('homepage.cover_text')}</p>
         </div>
       </section>
+
+      {/* Products Gallery Section */}
+      <style>{`
+        .homepage-gallery-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+          padding: 0 40px;
+        }
+
+        .homepage-gallery-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+          background: var(--inkcloud, #333);
+          color: white;
+          border: none;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          font-size: 28px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          transition: transform 0.2s, background 0.2s;
+        }
+
+        .homepage-gallery-arrow:hover {
+          transform: translateY(-50%) scale(1.1);
+          background: #555;
+        }
+
+        .homepage-gallery-arrow-left {
+          left: 0;
+        }
+
+        .homepage-gallery-arrow-right {
+          right: 0;
+        }
+
+        .homepage-simple-gallery {
+          display: flex;
+          gap: 24px;
+          padding: 20px 10px;
+          overflow-x: auto;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .homepage-simple-gallery::-webkit-scrollbar {
+          display: none;
+        }
+
+        .homepage-gallery-item {
+          flex: 0 0 280px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px;
+          background: var(--mossmilk, #f9f9f9);
+          border-radius: 16px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+          transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .homepage-gallery-item:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+        }
+
+        .homepage-gallery-image-wrapper {
+          width: 100%;
+          height: 200px;
+          overflow: hidden;
+          border-radius: 12px;
+          margin-bottom: 16px;
+        }
+
+        .homepage-gallery-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.3s;
+        }
+
+        .homepage-gallery-item:hover .homepage-gallery-image {
+          transform: scale(1.05);
+        }
+
+        .homepage-gallery-item-name {
+          margin: 0 0 8px 0;
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--inkcloud, #333);
+          text-align: center;
+        }
+
+        .homepage-gallery-item-desc {
+          margin: 0;
+          font-size: 14px;
+          color: var(--inkcloud, #666);
+          text-align: center;
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+          .homepage-gallery-wrapper {
+            padding: 0 30px;
+          }
+
+          .homepage-gallery-arrow {
+            width: 36px;
+            height: 36px;
+            font-size: 22px;
+          }
+
+          .homepage-gallery-item {
+            flex: 0 0 240px;
+            padding: 16px;
+          }
+
+          .homepage-gallery-image-wrapper {
+            height: 160px;
+          }
+
+          .homepage-gallery-item-name {
+            font-size: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .homepage-gallery-wrapper {
+            padding: 0 24px;
+          }
+
+          .homepage-gallery-arrow {
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+          }
+
+          .homepage-gallery-item {
+            flex: 0 0 200px;
+            padding: 12px;
+          }
+
+          .homepage-gallery-image-wrapper {
+            height: 140px;
+          }
+        }
+      `}</style>
+
+      <div style={{ padding: '20px' }}>
+        {productsError && !productsLoading && (
+          <p style={{ color: 'var(--inkcloud)', textAlign: 'center', marginBottom: 18 }}>{productsError}</p>
+        )}
+        {!productsLoading && renderSimpleGallery(t('product.dishes_title'), items.filter(i => i.available), 'homepage-strip-dishes')}
+      </div>
 
       <section id="feature" style={styles.featureSection}>
         <div style={styles.featureLeft}>

@@ -4,7 +4,6 @@ import Header from './pages/Header';
 import Footer from './pages/Footer';
 // Importa le pagine (aggiungi i files .tsx)
 import Homepage from './pages/Homepage';
-import Product from './pages/Product';
 import Contatti from './pages/Contact';
 import About from './pages/About';
 import Login from './pages/Login';
@@ -19,7 +18,6 @@ const App: React.FC = () => {
           <main style={{ flex: 1, overflowY: 'auto' }}>
           <Routes>
             <Route path="/" element={<Homepage />} />
-            <Route path="/product" element={<Product />} />
             <Route path="/contact" element={<Contatti />} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />

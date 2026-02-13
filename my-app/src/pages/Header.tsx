@@ -23,7 +23,6 @@ const Header: React.FC<HeaderProps> = ({
     }, []);
     const navLinks: NavLink[] = [
         { label: t('nav.home'), href: '/' },
-        { label: t('nav.products'), href: '/product' },
         { label: t('nav.about'), href: '/about' },
         { label: t('nav.contact'), href: '/contact' },
     ];

@@ -13,7 +13,4 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   db: { schema: 'public' },
 });
 
-// Disable RLS for this client (using service role key which should already bypass it)
-console.log('[Supabase] Initialized with service role key - RLS should be bypassed');
-
 module.exports = supabase;

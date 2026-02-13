@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import bg from '../assets/d.jpg';
-import imgC from '../assets/b.jpg';
+import imgC from '../assets/c.jpg';
 import home1 from '../assets/home1.jpg';
 import home2 from '../assets/home2.jpg';
 import Stepper, { Step } from '../Component/Stepper';

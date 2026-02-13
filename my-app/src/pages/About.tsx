@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import aImg from '../assets/c.jpg';
-import bImg from '../assets/b.jpg';
+import bImg from '../assets/c.jpg';
 
 const About: React.FC = () => {
   const { t } = useTranslation();

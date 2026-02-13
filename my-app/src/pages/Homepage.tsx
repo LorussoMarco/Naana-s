@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import bg from '../assets/d.jpg';
 import imgC from '../assets/b.jpg';
+import imgD from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
 
 const Homepage: React.FC = () => {
@@ -336,10 +337,11 @@ const Homepage: React.FC = () => {
         </div>
       )}
 
-      {/* Cover section: top image (d.jpg blurred), bottom image (b.jpg) */}
+      {/* Cover section: top image (d.jpg blurred), middle image (b.jpg), bottom image (c.jpg) */}
       <section id="cover" style={styles.coverSection}>
         <div style={styles.coverLeft} />
         <div style={styles.coverBottom} />
+        <div style={styles.coverBottomTwo} />
       </section>
 
       <section id="feature" style={styles.featureSection}>
@@ -546,8 +548,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   coverSection: {
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gridTemplateRows: '1fr 1fr',
-    minHeight: '100vh',
+    gridTemplateRows: '1fr 1fr 1fr',
+    minHeight: '150vh',
     alignItems: 'stretch',
     position: 'relative',
     zIndex: 15,
@@ -557,23 +559,27 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     filter: 'blur(4px)',
-    minHeight: '50vh',
+    minHeight: '33vh',
   },
   coverBottom: {
     backgroundImage: `url(${imgC})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     filter: 'none',
-    minHeight: '50vh',
+    minHeight: '33vh',
+  },
+  coverBottomTwo: {
+    backgroundImage: `url(${imgD})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    filter: 'none',
+    minHeight: '33vh',
   },
   coverTitle: {
     display: 'none',
   },
   coverText: {
     display: 'none',
-  },
-    fontSize: 16,
-    maxWidth: 520,
   },
 };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import bImg from '../assets/b.jpg';
+import bImg from '../assets/c.jpg';
 // import CircularGallery from '../Component/CircularGallery'
 
 // NOTE: front-end will only display products coming from the backend `/api/items`.

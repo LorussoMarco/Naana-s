@@ -80,14 +80,16 @@ router.get('/:id', async (req, res) => {
 router.post('/', verifyToken, upload.array('images'), async (req, res) => {
   try {
     const payload = req.body || {};
-    // parse images JSON if sent as string
-    if (payload.images && typeof payload.images === 'string') {
-      try { payload.images = JSON.parse(payload.images); } catch (_) {}
-    }
+    
+    // Parse multipart form fields properly (multer sends them as strings)
+    const name = payload.name || '';
+    const available = payload.available === 'true';
+    const description = payload.description && payload.description.trim() ? payload.description : null;
 
-    const imagesArray = Array.isArray(payload.images) ? payload.images.slice() : [];
+    const imagesArray = [];
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'product-images';
 
+    // Upload files if any
     if (req.files && req.files.length) {
       for (const file of req.files) {
         const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -99,15 +101,18 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
           return res.status(500).json({ error: 'Failed to upload file to storage', details: uploadError.message || uploadError });
         }
 
-        // Store the storage path in DB (e.g. 'items/xxxx').
-        // We will generate short-lived signed URLs when items are requested.
         imagesArray.push(filePath);
       }
     }
 
-    payload.images = imagesArray;
+    const itemPayload = {
+      name,
+      available,
+      description,
+      images: imagesArray
+    };
 
-    const { data, error } = await supabase.from('items').insert([payload]).select().single();
+    const { data, error } = await supabase.from('items').insert([itemPayload]).select().single();
     if (error) {
       return res.status(500).json({ error: 'Failed to insert item', details: error.message || error });
     }
@@ -119,12 +124,16 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
 
 // Update item (protected) — supports multipart/form-data with files in `images` field
 // Kept existing images should be sent in `keptImages` field as JSON string
-// If new files are uploaded via `images`, they are appended to keptImages
 router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
   try {
     const id = req.params.id;
     const payload = req.body || {};
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'product-images';
+
+    // Parse multipart form fields properly (multer sends them as strings)
+    const name = payload.name || '';
+    const available = payload.available === 'true';
+    const description = payload.description && payload.description.trim() ? payload.description : null;
 
     // Get kept images from the keptImages field (JSON string)
     let imagesArray = [];
@@ -147,18 +156,19 @@ router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
         const { data: uploadData, error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file.buffer, { contentType: file.mimetype });
         if (uploadError) return res.status(500).json({ error: uploadError.message || uploadError });
 
-        // Store the storage path only
         imagesArray.push(filePath);
       }
     }
 
-    // Update payload with final images array
-    payload.images = imagesArray;
-    // Remove temporary fields
-    delete payload.keptImages;
-    delete payload.id;
+    // Build final update payload
+    const itemPayload = {
+      name,
+      available,
+      description,
+      images: imagesArray
+    };
 
-    const { data, error } = await supabase.from('items').update(payload).eq('id', id).select().single();
+    const { data, error } = await supabase.from('items').update(itemPayload).eq('id', id).select().single();
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
   } catch (e) {

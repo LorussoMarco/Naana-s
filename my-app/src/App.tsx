@@ -14,9 +14,9 @@ import ManageOrders from './pages/ManageOrders';
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="h-screen flex flex-col bg-gray-900">
-        <Header />{}
-          <main className="flex-1 overflow-y-auto">
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Header />
+          <main style={{ flex: 1, overflowY: 'auto' }}>
           <Routes>
             <Route path="/" element={<Homepage />} />
             <Route path="/product" element={<Product />} />

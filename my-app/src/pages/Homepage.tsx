@@ -772,9 +772,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'absolute' as const,
     inset: 0,
     backgroundImage: `url(${home3})`,
-    backgroundSize: 'cover',
+    backgroundSize: 'contain',
     backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',
+    backgroundRepeat: 'no-repeat',
   },
   stickyBgImage1: {
     display: 'none',

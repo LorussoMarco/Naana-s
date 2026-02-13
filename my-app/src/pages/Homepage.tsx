@@ -17,11 +17,13 @@ interface Item {
   description: string;
   photos: Photo[];
   available: boolean;
+  category?: string | null;
 }
 
 const Homepage: React.FC = () => {
   const { t } = useTranslation();
   const [showStepper, setShowStepper] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   // Products state
   const [items, setItems] = useState<Item[]>([]);
@@ -72,6 +74,7 @@ const Homepage: React.FC = () => {
               description: d.description || '',
               photos,
               available: typeof d.available === 'boolean' ? d.available : true,
+              category: d.category || null,
             };
           });
           const uniqueMap = new Map<string, Item>();
@@ -459,6 +462,47 @@ const Homepage: React.FC = () => {
 
       {/* Products Gallery Section */}
       <style>{`
+        .category-filters {
+          display: flex;
+          justify-content: center;
+          gap: 24px;
+          margin-bottom: 40px;
+          flex-wrap: wrap;
+          padding: 0 16px;
+        }
+
+        .category-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          padding: 16px;
+          border: 2px solid transparent;
+          border-radius: 12px;
+          background: var(--mossmilk, #f9f9f9);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          min-width: 100px;
+          font-size: 14px;
+          color: var(--inkcloud, #333);
+          font-weight: 600;
+        }
+
+        .category-btn:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .category-btn.active {
+          border-color: #d4a574;
+          background: linear-gradient(135deg, rgba(212,165,116,0.1), rgba(212,165,116,0.05));
+          color: #d4a574;
+        }
+
+        .category-icon {
+          font-size: 32px;
+        }
+
         .homepage-gallery-wrapper {
           position: relative;
           display: flex;
@@ -571,6 +615,20 @@ const Homepage: React.FC = () => {
         }
 
         @media (max-width: 768px) {
+          .category-filters {
+            gap: 16px;
+          }
+
+          .category-btn {
+            min-width: 90px;
+            padding: 12px;
+            font-size: 13px;
+          }
+
+          .category-icon {
+            font-size: 28px;
+          }
+
           .homepage-gallery-wrapper {
             padding: 0 30px;
           }
@@ -596,6 +654,20 @@ const Homepage: React.FC = () => {
         }
 
         @media (max-width: 480px) {
+          .category-filters {
+            gap: 12px;
+          }
+
+          .category-btn {
+            min-width: 80px;
+            padding: 10px;
+            font-size: 12px;
+          }
+
+          .category-icon {
+            font-size: 24px;
+          }
+
           .homepage-gallery-wrapper {
             padding: 0 24px;
           }
@@ -626,11 +698,54 @@ const Homepage: React.FC = () => {
         <div style={styles.featureRight} />
       </section>
 
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: '40px 16px' }}>
         {productsError && !productsLoading && (
           <p style={{ color: 'var(--inkcloud)', textAlign: 'center', marginBottom: 18 }}>{productsError}</p>
         )}
-        {!productsLoading && renderSimpleGallery(t('product.dishes_title'), items.filter(i => i.available), 'homepage-strip-dishes')}
+        {!productsLoading && (
+          <>
+            <h2 style={{ textAlign: 'center', marginBottom: 32, color: 'var(--inkcloud)', fontSize: 24 }}>
+              {t('product.dishes_title')}
+            </h2>
+            
+            <div className="category-filters">
+              <button
+                className={`category-btn ${selectedCategory === 'carne' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(selectedCategory === 'carne' ? null : 'carne')}
+              >
+                <span className="category-icon">🥩</span>
+                Carne
+              </button>
+              <button
+                className={`category-btn ${selectedCategory === 'pesce' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(selectedCategory === 'pesce' ? null : 'pesce')}
+              >
+                <span className="category-icon">🐟</span>
+                Pesce
+              </button>
+              <button
+                className={`category-btn ${selectedCategory === 'vegetariano' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(selectedCategory === 'vegetariano' ? null : 'vegetariano')}
+              >
+                <span className="category-icon">🥗</span>
+                Vegetariano
+              </button>
+              <button
+                className={`category-btn ${selectedCategory === 'dessert' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(selectedCategory === 'dessert' ? null : 'dessert')}
+              >
+                <span className="category-icon">🍰</span>
+                Dessert
+              </button>
+            </div>
+
+            {selectedCategory && renderSimpleGallery(
+              `${selectedCategory.charAt(0).toUpperCase()}${selectedCategory.slice(1)}`,
+              items.filter(i => i.available && i.category === selectedCategory), 
+              'homepage-strip-dishes'
+            )}
+          </>
+        )}
       </div>
 
       {/* Reviews Section */}

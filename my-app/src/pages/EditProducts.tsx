@@ -209,12 +209,10 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
     form.append('description', editing.description ?? '');
 
     const kept = existingImages.filter(u => !removedUrls.includes(u));
-    if (kept.length) {
-      form.append('images', JSON.stringify(kept));
-    } else {
-      form.append('images', JSON.stringify([]));
-    }
+    // Store kept images as a separate field to avoid mixing JSON with File objects
+    form.append('keptImages', JSON.stringify(kept));
 
+    // Append new files
     newFiles.forEach(f => form.append('images', f));
 
     if (editing.id) form.append('id', String(editing.id));

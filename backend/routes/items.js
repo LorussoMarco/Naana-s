@@ -118,25 +118,26 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
 });
 
 // Update item (protected) — supports multipart/form-data with files in `images` field
-// If `replaceImages=true` is sent (as a string), uploaded images will replace existing ones. Otherwise they are appended.
+// Kept existing images should be sent in `keptImages` field as JSON string
+// If new files are uploaded via `images`, they are appended to keptImages
 router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
   try {
     const id = req.params.id;
     const payload = req.body || {};
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'product-images';
 
-    // parse images JSON if provided
-    if (payload.images && typeof payload.images === 'string') {
-      try { payload.images = JSON.parse(payload.images); } catch (_) {}
+    // Get kept images from the keptImages field (JSON string)
+    let imagesArray = [];
+    if (payload.keptImages) {
+      try {
+        imagesArray = JSON.parse(payload.keptImages);
+        if (!Array.isArray(imagesArray)) imagesArray = [];
+      } catch (_) {
+        imagesArray = [];
+      }
     }
 
-    // fetch existing item to merge images if needed
-    const { data: existingData, error: fetchError } = await supabase.from('items').select('images').eq('id', id).limit(1);
-    if (fetchError) return res.status(500).json({ error: fetchError.message });
-    const existing = existingData && existingData.length ? existingData[0] : null;
-
-    let imagesArray = Array.isArray(payload.images) ? payload.images.slice() : (existing && Array.isArray(existing.images) ? existing.images.slice() : []);
-
+    // Upload new files and append to images array
     if (req.files && req.files.length) {
       for (const file of req.files) {
         const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -151,12 +152,11 @@ router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
       }
     }
 
-    // if client requested to replace images entirely
-    if (payload.replaceImages && (payload.replaceImages === 'true' || payload.replaceImages === true)) {
-      payload.images = Array.isArray(payload.images) ? payload.images : [];
-    } else {
-      payload.images = imagesArray;
-    }
+    // Update payload with final images array
+    payload.images = imagesArray;
+    // Remove temporary fields
+    delete payload.keptImages;
+    delete payload.id;
 
     const { data, error } = await supabase.from('items').update(payload).eq('id', id).select().single();
     if (error) return res.status(500).json({ error: error.message });

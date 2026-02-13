@@ -402,6 +402,9 @@ const Prodotti: React.FC = () => {
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
     padding: '20px',
+    minHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   grid: {
     display: 'flex',

@@ -336,14 +336,10 @@ const Homepage: React.FC = () => {
         </div>
       )}
 
-      {/* Cover section: left half image (uses a.png), right half title + description.
-          When this section scrolls into view it will overlay the blurred background. */}
+      {/* Cover section: top image (d.jpg blurred), bottom image (b.jpg) */}
       <section id="cover" style={styles.coverSection}>
         <div style={styles.coverLeft} />
-        <div style={styles.coverRight}>
-          <h2 style={styles.coverTitle}>{t('homepage.cover_title')}</h2>
-          <p style={styles.coverText}>{t('homepage.cover_text')}</p>
-        </div>
+        <div style={styles.coverBottom} />
       </section>
 
       <section id="feature" style={styles.featureSection}>
@@ -549,8 +545,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   coverSection: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    minHeight: '70vh',
+    gridTemplateColumns: '1fr',
+    gridTemplateRows: '1fr 1fr',
+    minHeight: '100vh',
     alignItems: 'stretch',
     position: 'relative',
     zIndex: 15,
@@ -559,25 +556,22 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundImage: `url(${bg})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    filter: 'none',
+    filter: 'blur(4px)',
+    minHeight: '50vh',
   },
-  coverRight: {
-    padding: '48px 32px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    background: 'linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85))',
-    borderRadius: 12,
-    boxShadow: '0 12px 40px rgba(16,24,40,0.06)',
+  coverBottom: {
+    backgroundImage: `url(${imgC})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    filter: 'none',
+    minHeight: '50vh',
   },
   coverTitle: {
-    margin: 0,
-    fontSize: 28,
-    fontWeight: 700,
+    display: 'none',
   },
   coverText: {
-    marginTop: 12,
-    color: 'var(--inkcloud)',
+    display: 'none',
+  },
     fontSize: 16,
     maxWidth: 520,
   },

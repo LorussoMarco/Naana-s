@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import bg from '../assets/d.jpg';
 import imgC from '../assets/b.jpg';
+import home1 from '../assets/home1.jpg';
+import home2 from '../assets/home2.jpg';
 import Stepper, { Step } from '../Component/Stepper';
 
 const Homepage: React.FC = () => {
@@ -69,7 +71,10 @@ const Homepage: React.FC = () => {
 
       {/* Sticky blurred background image: stays in place while sections scroll over it */}
       <div style={styles.stickyWrap} className="sticky-wrap">
-        <div style={styles.stickyBg} className="sticky-bg" />
+        <div style={styles.stickyBgContainer} className="sticky-bg">
+          <div style={styles.stickyBgImage1} />
+          <div style={styles.stickyBgImage2} />
+        </div>
         <a href="/product" style={styles.menuButton} className="menu-button">
           {t('homepage.view_products')}
         </a>
@@ -441,6 +446,33 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'flex-end',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  stickyBgContainer: {
+    position: 'sticky',
+    top: 72,
+    height: '60vh',
+    width: '100%',
+    zIndex: 0,
+    pointerEvents: 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    gap: 0,
+  },
+  stickyBgImage1: {
+    flex: 1,
+    height: '100%',
+    backgroundImage: `url(${home1})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  },
+  stickyBgImage2: {
+    flex: 1,
+    height: '100%',
+    backgroundImage: `url(${home2})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
   },
   stickyWrap: {
     position: 'relative',

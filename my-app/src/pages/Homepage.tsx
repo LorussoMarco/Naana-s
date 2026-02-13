@@ -97,12 +97,6 @@ const Homepage: React.FC = () => {
     fetchItems();
   }, [t]);
 
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
-  const [stepError, setStepError] = useState<string | null>(null);
-
-
   const overlayStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,

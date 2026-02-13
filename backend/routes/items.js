@@ -92,6 +92,7 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
     // Upload files if any
     if (req.files && req.files.length) {
       console.log(`[POST /items] Uploading ${req.files.length} files to bucket "${bucket}"`);
+      console.log(`[POST /items] Supabase client initialized:`, !!supabase);
       
       for (const file of req.files) {
         try {
@@ -99,16 +100,16 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
           const filename = `${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
           const filePath = `items/${filename}`;
 
-          console.log(`[POST /items] Uploading file: ${filePath}`);
+          console.log(`[POST /items] Uploading file: ${filePath}, size: ${file.size} bytes, mimetype: ${file.mimetype}`);
           
-          const { data: uploadData, error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file.buffer, { contentType: file.mimetype });
+          const { data: uploadData, error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file.buffer, { contentType: file.mimetype, upsert: false });
           
           if (uploadError) {
-            console.error(`[POST /items] Upload error for ${filePath}:`, uploadError);
+            console.error(`[POST /items] Upload error for ${filePath}:`, JSON.stringify(uploadError, null, 2));
             return res.status(500).json({ error: 'Failed to upload file to storage', details: uploadError.message || JSON.stringify(uploadError) });
           }
 
-          console.log(`[POST /items] File uploaded successfully: ${filePath}`);
+          console.log(`[POST /items] File uploaded successfully: ${filePath}`, uploadData);
           imagesArray.push(filePath);
         } catch (fileError) {
           console.error(`[POST /items] Exception uploading file:`, fileError);

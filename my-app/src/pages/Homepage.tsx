@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import bg from '../assets/b.jpg';
+import bg from '../assets/d.jpg';
 import imgC from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
 

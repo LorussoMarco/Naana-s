@@ -34,6 +34,8 @@ const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => (
         alt={item.name || 'Prodotto'} 
         className="homepage-gallery-image"
         loading="lazy"
+        decoding="async"
+        fetchPriority="low"
       />
     </div>
     <h3 className="homepage-gallery-item-name">{item.name || 'Prodotto'}</h3>
@@ -516,16 +518,16 @@ const Homepage: React.FC = () => {
           border-radius: 12px;
           background: var(--mossmilk, #f9f9f9);
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: border-color 0.2s ease, background 0.2s ease;
           min-width: 100px;
           font-size: 14px;
           color: var(--inkcloud, #333);
           font-weight: 600;
+          will-change: border-color, background;
         }
 
         .category-btn:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+          border-color: #d4a574;
         }
 
         .category-btn.active {
@@ -543,6 +545,7 @@ const Homepage: React.FC = () => {
           display: flex;
           align-items: center;
           padding: 0 40px;
+          contain: layout style;
         }
 
         .homepage-gallery-arrow {
@@ -562,11 +565,12 @@ const Homepage: React.FC = () => {
           align-items: center;
           justify-content: center;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          transition: transform 0.2s, background 0.2s;
+          transition: background 0.15s ease;
+          will-change: background;
+          backface-visibility: hidden;
         }
 
         .homepage-gallery-arrow:hover {
-          transform: translateY(-50%) scale(1.1);
           background: #555;
         }
 
@@ -587,6 +591,7 @@ const Homepage: React.FC = () => {
           -webkit-overflow-scrolling: touch;
           scrollbar-width: none;
           -ms-overflow-style: none;
+          contain: layout;
         }
 
         .homepage-simple-gallery::-webkit-scrollbar {
@@ -602,12 +607,11 @@ const Homepage: React.FC = () => {
           background: var(--mossmilk, #f9f9f9);
           border-radius: 16px;
           box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-          transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .homepage-gallery-item:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+          transition: none;
+          will-change: auto;
+          contain: layout style paint;
+          backface-visibility: hidden;
+          transform: translateZ(0);
         }
 
         .homepage-gallery-image-wrapper {
@@ -616,17 +620,16 @@ const Homepage: React.FC = () => {
           overflow: hidden;
           border-radius: 12px;
           margin-bottom: 16px;
+          contain: layout paint;
         }
 
         .homepage-gallery-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.3s;
-        }
-
-        .homepage-gallery-item:hover .homepage-gallery-image {
-          transform: scale(1.05);
+          display: block;
+          transition: none;
+          will-change: auto;
         }
 
         .homepage-gallery-item-name {

@@ -34,6 +34,8 @@ const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => (
         alt={item.name || 'Prodotto'} 
         className="gallery-image"
         loading="lazy"
+        decoding="async"
+        fetchPriority="low"
       />
     </div>
     <h3 className="gallery-item-name">{item.name || 'Prodotto'}</h3>
@@ -244,12 +246,11 @@ const Prodotti: React.FC = () => {
           background: var(--mossmilk, #f9f9f9);
           border-radius: 16px;
           box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-          transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .gallery-item:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+          transition: none;
+          will-change: auto;
+          contain: layout style paint;
+          backface-visibility: hidden;
+          transform: translateZ(0);
         }
 
         .gallery-image-wrapper {
@@ -258,17 +259,16 @@ const Prodotti: React.FC = () => {
           overflow: hidden;
           border-radius: 12px;
           margin-bottom: 16px;
+          contain: layout paint;
         }
 
         .gallery-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.3s;
-        }
-
-        .gallery-item:hover .gallery-image {
-          transform: scale(1.05);
+          display: block;
+          transition: none;
+          will-change: auto;
         }
 
         .gallery-item-name {

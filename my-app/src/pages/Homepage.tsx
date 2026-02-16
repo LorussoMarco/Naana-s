@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import bg from '../assets/d.jpg';
 import imgC from '../assets/c.jpg';
@@ -20,10 +20,36 @@ interface Item {
   category?: string | null;
 }
 
+// Memoized gallery item component to prevent unnecessary re-renders
+interface GalleryItemProps {
+  item: Item;
+  bImg: string;
+  idx: number;
+}
+
+const GalleryItem = React.memo(({ item, bImg, idx }: GalleryItemProps) => (
+  <div className="homepage-gallery-item">
+    <div className="homepage-gallery-image-wrapper">
+      <img 
+        src={(item.photos && item.photos[0] && item.photos[0].url) || bImg} 
+        alt={item.name || 'Prodotto'} 
+        className="homepage-gallery-image"
+        loading="lazy"
+      />
+    </div>
+    <h3 className="homepage-gallery-item-name">{item.name || 'Prodotto'}</h3>
+    {item.description && (
+      <p className="homepage-gallery-item-desc">{item.description}</p>
+    )}
+  </div>
+));
+
 const Homepage: React.FC = () => {
   const { t } = useTranslation();
   const [showStepper, setShowStepper] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8; // Show 8 items per page
   
   // Products state
   const [items, setItems] = useState<Item[]>([]);
@@ -99,6 +125,25 @@ const Homepage: React.FC = () => {
     fetchItems();
   }, [t]);
 
+  // Reset page when category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
+
+  // Memoized filtered items for current category
+  const filteredItems = useMemo(() => {
+    if (!selectedCategory) return [];
+    return items.filter(i => i.available && i.category === selectedCategory);
+  }, [items, selectedCategory]);
+
+  // Memoized paginated items
+  const paginatedItems = useMemo(() => {
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredItems.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+  }, [filteredItems, currentPage]);
+
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+
   const overlayStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,
@@ -150,26 +195,58 @@ const Homepage: React.FC = () => {
           </button>
           <div className="homepage-simple-gallery" ref={scrollContainerRef}>
             {list.map((item, idx) => (
-              <div key={item._id || idx} className="homepage-gallery-item">
-                <div className="homepage-gallery-image-wrapper">
-                  <img 
-                    src={(item.photos && item.photos[0] && item.photos[0].url) || bImg} 
-                    alt={item.name || 'Prodotto'} 
-                    className="homepage-gallery-image"
-                    loading="lazy"
-                  />
-                </div>
-                <h3 className="homepage-gallery-item-name">{item.name || 'Prodotto'}</h3>
-                {item.description && (
-                  <p className="homepage-gallery-item-desc">{item.description}</p>
-                )}
-              </div>
+              <GalleryItem key={item._id || idx} item={item} bImg={bImg} idx={idx} />
             ))}
           </div>
           <button className="homepage-gallery-arrow homepage-gallery-arrow-right" onClick={() => scroll('right')} aria-label="Scorri a destra">
             ›
           </button>
         </div>
+      </section>
+    );
+  };
+
+  // Paginated gallery with navigation
+  const renderPaginatedGallery = (title: string, list: Item[], currentPage: number, totalPages: number, ariaId: string) => {
+    if (!list || list.length === 0) {
+      return (
+        <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
+          <h2 id={ariaId} style={{ margin: '8px 0 12px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
+          <p style={{ textAlign: 'center', color: 'var(--inkcloud)' }}>Nessun prodotto disponibile</p>
+        </section>
+      );
+    }
+
+    return (
+      <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
+        <h2 id={ariaId} style={{ margin: '8px 0 24px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24, padding: '0 16px' }}>
+          {list.map((item, idx) => (
+            <GalleryItem key={item._id || idx} item={item} bImg={bImg} idx={idx} />
+          ))}
+        </div>
+        
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 32 }}>
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              style={{ padding: '8px 12px', borderRadius: 6, background: currentPage === 1 ? '#ccc' : '#111827', color: 'white', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+            >
+              ← Precedente
+            </button>
+            <span style={{ color: 'var(--inkcloud)', fontWeight: 600 }}>
+              Pagina {currentPage} di {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              style={{ padding: '8px 12px', borderRadius: 6, background: currentPage === totalPages ? '#ccc' : '#111827', color: 'white', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+            >
+              Successiva →
+            </button>
+          </div>
+        )}
       </section>
     );
   };
@@ -739,9 +816,11 @@ const Homepage: React.FC = () => {
               </button>
             </div>
 
-            {selectedCategory && renderSimpleGallery(
+            {selectedCategory && renderPaginatedGallery(
               `${selectedCategory.charAt(0).toUpperCase()}${selectedCategory.slice(1)}`,
-              items.filter(i => i.available && i.category === selectedCategory), 
+              paginatedItems, 
+              currentPage,
+              totalPages,
               'homepage-strip-dishes'
             )}
           </>

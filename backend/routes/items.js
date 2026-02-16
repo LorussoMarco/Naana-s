@@ -5,6 +5,41 @@ const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 const router = express.Router();
 
+// In-memory cache for signed URLs (pathString -> { url, expiresAt })
+const signedUrlCache = new Map();
+const CACHE_TTL = 50 * 60 * 1000; // 50 minutes (signed URLs last 1 hour)
+const REFRESH_THRESHOLD = 5 * 60 * 1000; // Refresh if expiring in <5 minutes
+
+// Helper to get or create signed URL with caching
+async function getSignedUrl(bucket, imagePath) {
+  const now = Date.now();
+  const cached = signedUrlCache.get(imagePath);
+  
+  // Return cached URL if still valid and not expiring soon
+  if (cached && cached.expiresAt > now + REFRESH_THRESHOLD) {
+    return cached.url;
+  }
+  
+  // Generate new signed URL
+  try {
+    const ttl = 60 * 60; // 1 hour
+    const { data: signedData, error: signedErr } = await supabase.storage.from(bucket).createSignedUrl(imagePath, ttl);
+    if (signedErr) return null;
+    
+    const signedUrl = signedData && signedData.signedUrl ? signedData.signedUrl : null;
+    if (signedUrl) {
+      // Cache it with expiry time
+      signedUrlCache.set(imagePath, {
+        url: signedUrl,
+        expiresAt: now + ttl * 1000
+      });
+    }
+    return signedUrl;
+  } catch (e) {
+    return null;
+  }
+}
+
 // Public GET endpoints for products (used by frontend product listing)
 // Protect mutating endpoints (create/update/delete) with verifyToken
 
@@ -16,29 +51,25 @@ router.get('/', async (req, res) => {
 
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'product-images';
 
-    // For each item, if images are stored as storage paths (e.g. 'items/..'),
-    // generate short-lived signed URLs on the fly. If the image entry is already
-    // a full URL (starts with http), leave it as-is.
-    const transformed = await Promise.all((items || []).map(async (it) => {
-      if (!it.images || !Array.isArray(it.images)) return it;
-      const imgs = await Promise.all(it.images.map(async (img) => {
-        if (!img) return img;
-        // if it's already a full URL, return as-is
-        if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
-          return img;
-        }
-        // otherwise assume it's a storage path and create a signed url
-        try {
-          const ttl = 60 * 60; // 1 hour
-          const { data: signedData, error: signedErr } = await supabase.storage.from(bucket).createSignedUrl(img, ttl);
-          if (signedErr) return null;
-          return signedData && signedData.signedUrl ? signedData.signedUrl : null;
-        } catch (e) {
-          return null;
-        }
-      }));
-      return { ...it, images: imgs };
-    }));
+    // For each item, process images with caching
+    const transformed = items || [];
+    for (let i = 0; i < transformed.length; i++) {
+      const it = transformed[i];
+      if (!it.images || !Array.isArray(it.images)) continue;
+      
+      const processedImages = await Promise.all(
+        it.images.map(async (img) => {
+          if (!img) return img;
+          // if it's already a full URL, return as-is
+          if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
+            return img;
+          }
+          // Use cached signed URL helper
+          return await getSignedUrl(bucket, img);
+        })
+      );
+      transformed[i] = { ...it, images: processedImages };
+    }
 
     res.json(transformed);
   } catch (e) {
@@ -56,19 +87,14 @@ router.get('/:id', async (req, res) => {
     const item = data[0];
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'product-images';
     if (item.images && Array.isArray(item.images)) {
-      const imgs = await Promise.all(item.images.map(async (img) => {
-        if (!img) return img;
-        if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) return img;
-        try {
-          const ttl = 60 * 60; // 1 hour
-          const { data: signedData, error: signedErr } = await supabase.storage.from(bucket).createSignedUrl(img, ttl);
-          if (signedErr) return null;
-          return signedData && signedData.signedUrl ? signedData.signedUrl : null;
-        } catch (e) {
-          return null;
-        }
-      }));
-      item.images = imgs;
+      const processedImages = await Promise.all(
+        item.images.map(async (img) => {
+          if (!img) return img;
+          if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) return img;
+          return await getSignedUrl(bucket, img);
+        })
+      );
+      item.images = processedImages;
     }
     res.json(item);
   } catch (e) {

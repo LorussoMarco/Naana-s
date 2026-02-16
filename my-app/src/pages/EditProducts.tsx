@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
 
 type Item = {
   id?: string;
@@ -183,14 +184,49 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
   if (!editing) return null;
   const [newFiles, setNewFiles] = React.useState<File[]>([]);
   const [removedUrls, setRemovedUrls] = React.useState<string[]>([]);
+  const [isCompressing, setIsCompressing] = React.useState(false);
+  const [compressError, setCompressError] = React.useState<string | null>(null);
 
   const existingImages: string[] = Array.isArray(editing.images) ? editing.images.filter(Boolean).map((i: any) => (typeof i === 'string' ? i : i.url || '')) : [];
 
-  function onFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files) return;
-    setNewFiles(prev => [...prev, ...Array.from(files)]);
-    e.currentTarget.value = '';
+    
+    setCompressError(null);
+    setIsCompressing(true);
+    
+    try {
+      const compressedFiles = [];
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/')) {
+          compressedFiles.push(file);
+          continue;
+        }
+        
+        try {
+          const options = {
+            maxSizeMB: 0.5, // 500KB max
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+            fileType: file.type as any
+          };
+          const compressedFile = await imageCompression(file, options);
+          compressedFiles.push(compressedFile);
+        } catch (err) {
+          console.error('Compression error for', file.name, err);
+          compressedFiles.push(file);
+        }
+      }
+      
+      setNewFiles(prev => [...prev, ...compressedFiles]);
+    } catch (err: any) {
+      setCompressError('Errore durante la compressione delle immagini: ' + (err.message || ''));
+      console.error(err);
+    } finally {
+      setIsCompressing(false);
+      e.currentTarget.value = '';
+    }
   }
 
   function removeExisting(url: string) {
@@ -204,6 +240,7 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!editing) return;
+    
     const form = new FormData();
     form.append('name', editing.name || '');
     form.append('available', editing.available ? 'true' : 'false');
@@ -214,7 +251,7 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
     // Store kept images as a separate field to avoid mixing JSON with File objects
     form.append('keptImages', JSON.stringify(kept));
 
-    // Append new files
+    // Append new files (already compressed from onFilesChange)
     newFiles.forEach(f => form.append('images', f));
 
     if (editing.id) form.append('id', String(editing.id));
@@ -273,20 +310,22 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 6 }}>Aggiungi immagini</label>
-        <input type="file" accept="image/*" multiple onChange={onFilesChange} />
+        {isCompressing && <div style={{ color: '#1e40af', marginBottom: 8, fontSize: 13 }}>⏳ Compressione immagini in corso...</div>}
+        {compressError && <div style={{ color: '#dc2626', marginBottom: 8, fontSize: 13 }}>❌ {compressError}</div>}
+        <input type="file" accept="image/*" multiple onChange={onFilesChange} disabled={isCompressing} />
         <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
           {newFiles.map((f, i) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <img src={URL.createObjectURL(f)} alt={f.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 6 }} />
-              <button type="button" onClick={() => removeNewFile(i)} style={{ marginTop: 6, fontSize: 12, color: 'white' }}>Rimuovi</button>
+              <button type="button" onClick={() => removeNewFile(i)} disabled={isCompressing} style={{ marginTop: 6, fontSize: 12, color: 'white' }}>Rimuovi</button>
             </div>
           ))}
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 8 }}>
-        <button type="submit" style={{ padding: '8px 12px', borderRadius: 8, background: '#111827', color: '#fff' }}>Salva</button>
-        <button type="button" onClick={cancelEdit} style={{ padding: '8px 12px', borderRadius: 8, color: 'white' }}>Annulla</button>
+        <button type="submit" disabled={isCompressing} style={{ padding: '8px 12px', borderRadius: 8, background: '#111827', color: '#fff', opacity: isCompressing ? 0.6 : 1 }}>Salva</button>
+        <button type="button" onClick={cancelEdit} disabled={isCompressing} style={{ padding: '8px 12px', borderRadius: 8, color: 'white', opacity: isCompressing ? 0.6 : 1 }}>Annulla</button>
       </div>
     </form>
   );

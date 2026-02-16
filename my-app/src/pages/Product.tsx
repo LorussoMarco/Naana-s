@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import bImg from '../assets/c.jpg';
 // import CircularGallery from '../Component/CircularGallery'
@@ -19,6 +19,30 @@ interface Item {
   photos: Photo[];
   available: boolean;
 }
+
+// Memoized gallery item component
+interface GalleryItemProps {
+  item: Item;
+  bImg: string;
+  idx: number;
+}
+
+const GalleryItem = React.memo(({ item, bImg, idx }: GalleryItemProps) => (
+  <div className="gallery-item">
+    <div className="gallery-image-wrapper">
+      <img 
+        src={(item.photos && item.photos[0] && item.photos[0].url) || bImg} 
+        alt={item.name || 'Prodotto'} 
+        className="gallery-image"
+        loading="lazy"
+      />
+    </div>
+    <h3 className="gallery-item-name">{item.name || 'Prodotto'}</h3>
+    {item.description && (
+      <p className="gallery-item-desc">{item.description}</p>
+    )}
+  </div>
+));
 
 const Prodotti: React.FC = () => {
   const { t } = useTranslation();
@@ -107,20 +131,7 @@ const Prodotti: React.FC = () => {
           </button>
           <div className="simple-gallery" ref={scrollContainerRef}>
             {list.map((item, idx) => (
-              <div key={item._id || idx} className="gallery-item">
-                <div className="gallery-image-wrapper">
-                  <img 
-                    src={(item.photos && item.photos[0] && item.photos[0].url) || bImg} 
-                    alt={item.name || 'Prodotto'} 
-                    className="gallery-image"
-                    loading="lazy"
-                  />
-                </div>
-                <h3 className="gallery-item-name">{item.name || 'Prodotto'}</h3>
-                {item.description && (
-                  <p className="gallery-item-desc">{item.description}</p>
-                )}
-              </div>
+              <GalleryItem key={item._id || idx} item={item} bImg={bImg} idx={idx} />
             ))}
           </div>
           <button className="gallery-arrow gallery-arrow-right" onClick={() => scroll('right')} aria-label="Scorri a destra">

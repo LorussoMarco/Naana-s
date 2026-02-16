@@ -197,7 +197,7 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
     setIsCompressing(true);
     
     try {
-      const compressedFiles = [];
+      const compressedFiles: File[] = [];
       for (const file of Array.from(files)) {
         if (!file.type.startsWith('image/')) {
           compressedFiles.push(file);

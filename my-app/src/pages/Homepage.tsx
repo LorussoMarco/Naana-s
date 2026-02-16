@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import bg from '../assets/d.jpg';
 import imgC from '../assets/c.jpg';
@@ -24,10 +24,9 @@ interface Item {
 interface GalleryItemProps {
   item: Item;
   bImg: string;
-  idx: number;
 }
 
-const GalleryItem = React.memo(({ item, bImg, idx }: GalleryItemProps) => (
+const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => (
   <div className="homepage-gallery-item">
     <div className="homepage-gallery-image-wrapper">
       <img 
@@ -55,7 +54,6 @@ const Homepage: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   // Step 1 - client
   const [firstName, setFirstName] = useState('');
@@ -166,46 +164,6 @@ const Homepage: React.FC = () => {
     padding: 0,
   };
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 300;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const renderSimpleGallery = (title: string, list: Item[], ariaId: string) => {
-    if (!list || list.length === 0) {
-      return (
-        <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
-          <h2 id={ariaId} style={{ margin: '8px 0 12px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
-          <p style={{ textAlign: 'center', color: 'var(--inkcloud)' }}>Nessun prodotto disponibile</p>
-        </section>
-      );
-    }
-
-    return (
-      <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
-        <h2 id={ariaId} style={{ margin: '8px 0 24px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
-        <div className="homepage-gallery-wrapper">
-          <button className="homepage-gallery-arrow homepage-gallery-arrow-left" onClick={() => scroll('left')} aria-label="Scorri a sinistra">
-            ‹
-          </button>
-          <div className="homepage-simple-gallery" ref={scrollContainerRef}>
-            {list.map((item, idx) => (
-              <GalleryItem key={item._id || idx} item={item} bImg={bImg} idx={idx} />
-            ))}
-          </div>
-          <button className="homepage-gallery-arrow homepage-gallery-arrow-right" onClick={() => scroll('right')} aria-label="Scorri a destra">
-            ›
-          </button>
-        </div>
-      </section>
-    );
-  };
-
   // Paginated gallery with navigation
   const renderPaginatedGallery = (title: string, list: Item[], currentPage: number, totalPages: number, ariaId: string) => {
     if (!list || list.length === 0) {
@@ -222,7 +180,7 @@ const Homepage: React.FC = () => {
         <h2 id={ariaId} style={{ margin: '8px 0 24px', color: 'var(--inkcloud)', fontSize: 24, textAlign: 'center' }}>{title}</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24, padding: '0 16px' }}>
           {list.map((item, idx) => (
-            <GalleryItem key={item._id || idx} item={item} bImg={bImg} idx={idx} />
+            <GalleryItem key={item._id || idx} item={item} bImg={bImg} />
           ))}
         </div>
         

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
+import AuthService from "../services/AuthService";
 import logoImg from "../assets/logo.jpg";
 
 type NavLink = { label: string; href: string };
@@ -70,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({
                                 Gestisci Ordini
                             </a>
                             <button onClick={() => {
-                                localStorage.removeItem('token');
+                                AuthService.logout();
                                 window.location.href = '/';
                             }} style={styles.loginButton} className="auth-btn">
                                 {t('auth.logout')}

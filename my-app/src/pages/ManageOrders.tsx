@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import SecureHttpClient from '../services/SecureHttpClient';
 
 interface ClientInfo {
   id: number;
@@ -24,8 +25,6 @@ interface Order {
   event_type?: string | null;
 }
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
 const ManageOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +35,7 @@ const ManageOrders: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/orders`);
+      const res = await SecureHttpClient.get('/orders');
       if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
       const data = await res.json();
       setOrders(data || []);
@@ -53,11 +52,7 @@ const ManageOrders: React.FC = () => {
 
   const confirmOrder = async (id: number) => {
     try {
-      await fetch(`${API}/orders/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'confirmed' }),
-      });
+      await SecureHttpClient.put(`/orders/${id}`, { status: 'confirmed' });
       fetchOrders();
     } catch (e) {
       console.error(e);
@@ -66,11 +61,7 @@ const ManageOrders: React.FC = () => {
 
   const completeOrder = async (id: number) => {
     try {
-      await fetch(`${API}/orders/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'completed' }),
-      });
+      await SecureHttpClient.put(`/orders/${id}`, { status: 'completed' });
       fetchOrders();
     } catch (e) {
       console.error(e);
@@ -80,7 +71,7 @@ const ManageOrders: React.FC = () => {
   const deleteOrder = async (id: number) => {
     if (!confirm('Sei sicuro di voler eliminare questo ordine?')) return;
     try {
-      await fetch(`${API}/orders/${id}`, { method: 'DELETE' });
+      await SecureHttpClient.delete(`/orders/${id}`);
       fetchOrders();
     } catch (e) {
       console.error(e);

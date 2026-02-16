@@ -1,55 +1,101 @@
 const express = require('express');
 const router = express.Router();
-// supabase client for saving contact submissions
 const supabase = require('../supabaseClient');
-// Use Formsubmit.co only (no SMTP, no nodemailer)
+
 const SITE_OWNER_EMAIL = process.env.SITE_OWNER_EMAIL || 'maki4592@gmail.com';
-// Origin/Referer to send when calling Formsubmit (some providers require a valid origin)
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 
+// ─── Rate limiting (in-memory) ──────────────────────────────
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_MAX = 5; // max 5 submissions per window per IP
+const rateLimitStore = new Map();
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = rateLimitStore.get(ip);
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    rateLimitStore.set(ip, { windowStart: now, count: 1 });
+    return false;
+  }
+  entry.count++;
+  if (entry.count > RATE_LIMIT_MAX) return true;
+  return false;
+}
+
+// Cleanup stale entries every 30 min
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of rateLimitStore) {
+    if (now - entry.windowStart > RATE_LIMIT_WINDOW_MS) rateLimitStore.delete(ip);
+  }
+}, 30 * 60 * 1000);
+
+// ─── HTML sanitization ─────────────────────────────────────
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function buildMessageFromBody(body) {
-  // Create a readable text and HTML summary of the incoming payload
   const entries = Object.entries(body).filter(([k]) => !k.startsWith('_'));
   const textLines = entries.map(([k, v]) => `${k}: ${v}`);
-  const htmlLines = entries.map(([k, v]) => `<p><strong>${k}:</strong> ${String(v)}</p>`);
+  const htmlLines = entries.map(([k, v]) => `<p><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v))}</p>`);
   return {
     text: `You received a new message from the website contact form.\n\n${textLines.join('\n')}`,
     html: `<div><p>You received a new message from the website contact form.</p>${htmlLines.join('')}</div>`,
   };
 }
 
+// ─── Contact form endpoint ──────────────────────────────────
 router.post('/', async (req, res) => {
   try {
+    // Rate limiting
+    const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
+    if (isRateLimited(clientIp)) {
+      return res.status(429).json({ ok: false, error: 'Troppe richieste. Riprova tra qualche minuto.' });
+    }
+
     const body = req.body || {};
 
-    // Basic validation: require at least one of name/email/message or other useful fields
     if (!Object.keys(body).length) {
       return res.status(400).json({ ok: false, error: 'Missing fields' });
     }
 
+    // Validate required contact fields
+    if (!body.name || !body.email) {
+      return res.status(400).json({ ok: false, error: 'Nome e email richiesti' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(body.email)) {
+      return res.status(400).json({ ok: false, error: 'Formato email non valido' });
+    }
+
     const { text, html } = buildMessageFromBody(body);
 
-    // Persist the contact form to the database (contact_form table)
-    let dbResult = { ok: false };
+    // Persist to database (sanitised fields only)
+    let dbOk = false;
     try {
-      const name = body.name || null;
-      const email = body.email || null;
-      // prefer 'message' or 'text' fields for the stored message
-      const messageText = body.message || body.text || '';
+      const name = String(body.name || '').slice(0, 200);
+      const email = String(body.email || '').slice(0, 200);
+      const messageText = String(body.message || body.text || '').slice(0, 5000);
       const insertPayload = { name, email, text: messageText };
-      const { data: insertData, error: insertError } = await supabase.from('contact_form').insert([insertPayload]).select();
+      const { error: insertError } = await supabase.from('contact_form').insert([insertPayload]);
       if (insertError) {
         console.error('Supabase insert error for contact_form:', insertError);
-        dbResult = { ok: false, error: insertError };
       } else {
-        dbResult = { ok: true, data: insertData };
+        dbOk = true;
       }
     } catch (dbErr) {
       console.error('Exception while inserting contact_form:', dbErr);
-      dbResult = { ok: false, error: String(dbErr) };
     }
 
-    // Use Formsubmit.co to send the email (server-side)
+    // Send email via Formsubmit.co
     try {
       const params = new URLSearchParams();
       for (const [k, v] of Object.entries(body)) {
@@ -63,7 +109,6 @@ router.post('/', async (req, res) => {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
-          // Formsubmit checks referer/origin; set them to your frontend origin
           Referer: FRONTEND_ORIGIN,
           Origin: FRONTEND_ORIGIN,
         },
@@ -74,27 +119,25 @@ router.post('/', async (req, res) => {
       try {
         fetchData = fetchText ? JSON.parse(fetchText) : {};
       } catch (e) {
-        // not JSON
         fetchData = { raw: fetchText };
       }
 
-      // Log detailed response for debugging delivery issues
       console.log('Formsubmit response status:', fetchRes.status);
-      console.log('Formsubmit response body:', fetchData);
 
       if (!fetchRes.ok) {
         console.error('Formsubmit send error', fetchData);
-        return res.status(502).json({ ok: false, error: 'Failed to send via Formsubmit', details: fetchData, db: dbResult });
+        // Don't leak internal details to client
+        return res.status(502).json({ ok: false, error: 'Invio email fallito. Riprova più tardi.' });
       }
-      // Return both DB result and Formsubmit provider response
-      return res.json({ ok: true, info: fetchData, status: fetchRes.status, db: dbResult });
+
+      return res.json({ ok: true });
     } catch (sendErr) {
       console.error('Formsubmit send exception', sendErr);
-      return res.status(500).json({ ok: false, error: 'Failed to send email' });
+      return res.status(500).json({ ok: false, error: 'Invio email fallito' });
     }
   } catch (err) {
     console.error('Error sending contact email', err);
-    return res.status(500).json({ ok: false, error: 'Failed to send email' });
+    return res.status(500).json({ ok: false, error: 'Errore interno' });
   }
 });
 

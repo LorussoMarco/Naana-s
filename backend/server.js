@@ -9,10 +9,40 @@ const itemRoutes = require('./routes/items');
 const clientRoutes = require('./routes/clients');
 const contactRoutes = require('./routes/contact');
 
-
 const app = express();
 
-// Abilita CORS per frontend: legge domini da env CORS_ORIGINS (comma-separated), fallback localhost
+// Security headers with Helmet-like approach
+app.use((req, res, next) => {
+  // Prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  
+  // Enable XSS protection
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  
+  // Clickjacking protection
+  res.setHeader('X-Frame-Options', 'DENY');
+  
+  // Referrer policy
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Feature policy (Permissions-Policy)
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  
+  // Strict-Transport-Security (HTTPS enforcement)
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  
+  // CSP headers (Content Security Policy)
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;"
+  );
+  
+  next();
+});
+
+// CORS configuration
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map((o) => o.trim())
@@ -20,9 +50,27 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
 
 app.use(cors({
   origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 3600
 }));
 
-app.use(express.json());
+// Request logging middleware (security auditing)
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const logLevel = res.statusCode >= 400 ? '[WARN]' : '[INFO]';
+    console.log(
+      `${logLevel} ${req.method} ${req.path} - ${res.statusCode} - ${duration}ms - ${req.ip}`
+    );
+  });
+  next();
+});
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Supabase/Postgres client inizializzato in `supabaseClient.js`
 // facoltativo: semplice healthcheck per verificare la connessione alla tabella `users`

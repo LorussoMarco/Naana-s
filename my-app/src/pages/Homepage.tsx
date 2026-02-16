@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import SecureHttpClient from '../services/SecureHttpClient';
+import SEO from '../services/SEO';
+import { localBusinessSchema } from '../services/jsonLD';
 import bg from '../assets/d.jpg';
 import imgC from '../assets/c.jpg';
 import home3 from '../assets/home3.jpg';
@@ -85,8 +88,7 @@ const Homepage: React.FC = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const res = await fetch(`${apiBase}/items`);
+        const res = await SecureHttpClient.get('/items', { skipAuth: true });
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
           setItems([]);
@@ -212,7 +214,15 @@ const Homepage: React.FC = () => {
   };
 
   return (
-    <main style={styles.root}>
+    <>
+      <SEO
+        title="Homepage | Naana's Kitchen"
+        description="Benvenuto in Naana's Kitchen - Scopri i nostri piatti gourmet e servizi di catering professionale. Carne, pesce, vegetariano, dessert raffinati per ogni occasione."
+        url="https://naanaskitchen.com/"
+        type="website"
+        schema={localBusinessSchema}
+      />
+      <main style={styles.root}>
       <header style={styles.hero}>
           <div style={styles.heroInner}>
           <div style={styles.heroText}>
@@ -326,8 +336,6 @@ const Homepage: React.FC = () => {
                   setSubmitError(null);
                   setSubmitting(true);
                   try {
-                    const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
                     // Create client
                     const clientPayload = {
                       first_name: firstName,
@@ -336,11 +344,7 @@ const Homepage: React.FC = () => {
                       phone_number: phone,
                     };
 
-                    const cRes = await fetch(`${API}/clients`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(clientPayload),
-                    });
+                    const cRes = await SecureHttpClient.post('/clients', clientPayload, { skipAuth: true });
                     if (!cRes.ok) {
                       const err = await cRes.json().catch(() => ({}));
                       throw new Error(err.error || `Failed to create client (${cRes.status})`);
@@ -362,11 +366,7 @@ const Homepage: React.FC = () => {
                       status: 'pending',
                     };
 
-                    const oRes = await fetch(`${API}/orders`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(orderPayload),
-                    });
+                    const oRes = await SecureHttpClient.post('/orders', orderPayload, { skipAuth: true });
                     if (!oRes.ok) {
                       const err = await oRes.json().catch(() => ({}));
                       throw new Error(err.error || `Failed to create order (${oRes.status})`);
@@ -376,7 +376,7 @@ const Homepage: React.FC = () => {
 
                     // Send order details to backend /api/contact so server uses SITE_OWNER_EMAIL
                     try {
-                      const orderPayload = {
+                      const contactPayload = {
                         order_id: createdOrder.id || '',
                         first_name: firstName,
                         last_name: lastName,
@@ -394,11 +394,7 @@ const Homepage: React.FC = () => {
                         _subject: `New order${createdOrder.id ? ' #' + createdOrder.id : ''} from ${firstName} ${lastName}`,
                       };
 
-                      const mailRes = await fetch(`${API}/contact`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(orderPayload),
-                      });
+                      const mailRes = await SecureHttpClient.post('/contact', contactPayload, { skipAuth: true });
                       const mailData = await mailRes.json().catch(() => ({}));
                       if (!mailRes.ok || !mailData.ok) {
                         console.error('Order email error', mailData);
@@ -837,6 +833,7 @@ const Homepage: React.FC = () => {
       </section>
 
     </main>
+    </>
   );
 };
 

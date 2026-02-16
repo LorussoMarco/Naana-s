@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import SecureHttpClient from '../services/SecureHttpClient';
+import SEO from '../services/SEO';
 
 const Contact: React.FC = () => {
   const { t } = useTranslation();
@@ -16,12 +18,7 @@ const Contact: React.FC = () => {
       // optional subject
       payload._subject = payload._subject || `Contact form from ${payload.name || ''}`;
 
-      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const res = await fetch(`${API}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const res = await SecureHttpClient.post('/contact', payload, { skipAuth: true });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
         alert(t('contact.sent_alert'));
@@ -39,7 +36,14 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <main style={styles.root}>
+    <>
+      <SEO
+        title="Contatti | Naana's Kitchen"
+        description="Contattaci per i nostre servizi di catering. Info, telefono, email e indirizzi dei nostri uffici."
+        url="https://naanaskitchen.com/contact"
+        type="website"
+      />
+      <main style={styles.root}>
       <div style={styles.container}>
         <h1 style={styles.title}>{t('contact.title')}</h1>
         <p style={styles.lead}>{t('contact.lead')}</p>
@@ -85,6 +89,7 @@ const Contact: React.FC = () => {
         </section>
       </div>
     </main>
+    </>
   );
 };
 

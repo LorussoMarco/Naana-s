@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
+import SecureHttpClient from '../services/SecureHttpClient';
 
 type Item = {
   id?: string;
@@ -17,26 +18,21 @@ const EditProducts: React.FC = () => {
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Item | null>(null);
 
-  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-    }
+    // SecureHttpClient will handle auth checking
+    fetchItems();
   }, []);
 
   async function fetchItems() {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${apiBase}/items`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-      if (res.status === 401) {
-        // token expired or invalid
-        localStorage.removeItem('token');
-        navigate('/login');
+      const res = await SecureHttpClient.get('/items');
+      if (!res.ok) {
+        if (res.status === 401) {
+          navigate('/login');
+        }
         return;
       }
       const data = await res.json();
@@ -48,10 +44,6 @@ const EditProducts: React.FC = () => {
     }
   }
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
   const filtered = items.filter(i => {
     if (!query) return true;
     const q = query.toLowerCase();
@@ -61,14 +53,16 @@ const EditProducts: React.FC = () => {
 
   async function removeItem(id: string) {
     if (!confirm('Confermi la cancellazione di questo prodotto?')) return;
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${apiBase}/items/${id}`, { method: 'DELETE', headers: token ? { Authorization: `Bearer ${token}` } : {} });
-    if (res.status === 401) {
-      localStorage.removeItem('token');
-      navigate('/login');
-      return;
+    try {
+      const res = await SecureHttpClient.delete(`/items/${id}`);
+      if (res.status === 401) {
+        navigate('/login');
+        return;
+      }
+      fetchItems();
+    } catch (e) {
+      console.error(e);
     }
-    fetchItems();
   }
 
   function startEdit(item: Item) {
@@ -85,18 +79,18 @@ const EditProducts: React.FC = () => {
       const formData = eOrForm as FormData;
       if (!editing) return;
       const method = editing.id ? 'PUT' : 'POST';
-      const url = editing.id ? `${apiBase}/items/${editing.id}` : `${apiBase}/items`;
-      const token = localStorage.getItem('token');
-      const headers: any = {};
-      if (token) headers.Authorization = `Bearer ${token}`;
-      const res = await fetch(url, { method, headers, body: formData });
-      if (res.status === 401) {
-        localStorage.removeItem('token');
-        navigate('/login');
-        return;
+      const endpoint = editing.id ? `/items/${editing.id}` : `/items`;
+      try {
+        const res = await SecureHttpClient.fetchFormData(endpoint, formData, { method: method as any });
+        if (res.status === 401) {
+          navigate('/login');
+          return;
+        }
+        setEditing(null);
+        fetchItems();
+      } catch (e) {
+        console.error(e);
       }
-      setEditing(null);
-      fetchItems();
       return;
     }
 
@@ -110,18 +104,18 @@ const EditProducts: React.FC = () => {
     // description nullable
     if (payload.description === '') payload.description = null;
     const method = editing.id ? 'PUT' : 'POST';
-    const url = editing.id ? `${apiBase}/items/${editing.id}` : `${apiBase}/items`;
-    const token = localStorage.getItem('token');
-    const headers: any = { 'Content-Type': 'application/json' };
-    if (token) headers.Authorization = `Bearer ${token}`;
-    const res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
-    if (res.status === 401) {
-      localStorage.removeItem('token');
-      navigate('/login');
-      return;
+    const endpoint = editing.id ? `/items/${editing.id}` : `/items`;
+    try {
+      const res = await SecureHttpClient[method.toLowerCase() as 'put' | 'post'](endpoint, payload);
+      if (res.status === 401) {
+        navigate('/login');
+        return;
+      }
+      setEditing(null);
+      fetchItems();
+    } catch (e) {
+      console.error(e);
     }
-    setEditing(null);
-    fetchItems();
   }
 
   function startNew() {

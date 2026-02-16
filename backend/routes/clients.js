@@ -1,9 +1,23 @@
 const express = require('express');
 const supabase = require('../supabaseClient');
+const { verifyToken } = require('../middleware/auth');
 const router = express.Router();
 
+// Whitelist of allowed client fields
+const CLIENT_ALLOWED_FIELDS = ['first_name', 'last_name', 'email', 'phone_number'];
+
+function pickAllowed(obj, allowedKeys) {
+  const result = {};
+  for (const key of allowedKeys) {
+    if (obj[key] !== undefined) result[key] = obj[key];
+  }
+  return result;
+}
+
+// ─── PROTECTED routes (admin only) ──────────────────────────
+
 // List clients
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const { data, error } = await supabase.from('clients').select('*').order('created_at', { ascending: false });
     if (error) return res.status(500).json({ error: error.message });
@@ -14,7 +28,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get single client
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
     const { data, error } = await supabase.from('clients').select('*').eq('id', id).limit(1);
@@ -26,11 +40,18 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create client
+// ─── PUBLIC route (customer creation from order stepper) ────
+
+// Create client (whitelisted fields only)
 router.post('/', async (req, res) => {
   try {
-    const payload = req.body; // expect first_name, last_name, email, phone_number
-    const { data, error } = await supabase.from('clients').insert([payload]).select().single();
+    const safePayload = pickAllowed(req.body || {}, CLIENT_ALLOWED_FIELDS);
+
+    if (!safePayload.first_name || !safePayload.last_name) {
+      return res.status(400).json({ error: 'Nome e cognome richiesti' });
+    }
+
+    const { data, error } = await supabase.from('clients').insert([safePayload]).select().single();
     if (error) return res.status(500).json({ error: error.message });
     res.status(201).json(data);
   } catch (e) {
@@ -38,12 +59,19 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update client
-router.put('/:id', async (req, res) => {
+// ─── PROTECTED routes (admin only) ──────────────────────────
+
+// Update client (whitelisted fields)
+router.put('/:id', verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
-    const payload = req.body;
-    const { data, error } = await supabase.from('clients').update(payload).eq('id', id).select().single();
+    const safePayload = pickAllowed(req.body || {}, CLIENT_ALLOWED_FIELDS);
+
+    if (Object.keys(safePayload).length === 0) {
+      return res.status(400).json({ error: 'Nessun campo valido da aggiornare' });
+    }
+
+    const { data, error } = await supabase.from('clients').update(safePayload).eq('id', id).select().single();
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
   } catch (e) {
@@ -52,7 +80,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete client
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
     const { error } = await supabase.from('clients').delete().eq('id', id);

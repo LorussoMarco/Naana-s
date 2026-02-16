@@ -1,12 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import SEO from '../services/SEO';
 import aImg from '../assets/c.jpg';
 import bImg from '../assets/c.jpg';
 
 const About: React.FC = () => {
   const { t } = useTranslation();
   return (
-    <section style={styles.section} aria-labelledby="about-title">
+    <>
+      <SEO
+        title="Chi Siamo | Naana's Kitchen"
+        description="Scopri la storia di Naana's Kitchen, il nostro impegno verso l'eccellenza culinaria e i nostri servizi di catering professionale."
+        url="https://naanaskitchen.com/about"
+        type="website"
+      />
+      <section style={styles.section} aria-labelledby="about-title">
       <div style={styles.container}>
         <h1 id="about-title" style={styles.title}>{t('about.title')}</h1>
         <p style={styles.lead}>
@@ -40,6 +48,7 @@ const About: React.FC = () => {
         </p>
       </div>
     </section>
+    </>
   );
 };
 

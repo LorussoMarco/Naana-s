@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import SecureHttpClient from '../services/SecureHttpClient';
+import SEO from '../services/SEO';
 import bImg from '../assets/c.jpg';
 // import CircularGallery from '../Component/CircularGallery'
 
@@ -52,12 +54,10 @@ const Prodotti: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await fetch(`${apiBase}/items`);
+        const res = await SecureHttpClient.get('/items', { skipAuth: true });
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
           // no items in DB
@@ -174,7 +174,14 @@ const Prodotti: React.FC = () => {
   */
 
   return (
-    <div style={styles.container}>
+    <>
+      <SEO
+        title="Prodotti | Naana's Kitchen"
+        description="Scopri la nostra selezione di piatti gourmet: carne, pesce, vegetariano e dessert. Servizi catering per ogni esigenza."
+        url="https://naanaskitchen.com/products"
+        type="website"
+      />
+      <div style={styles.container}>
       <h1 style={styles.title}>{t('product.title')}</h1>
       {error && !loading && (
         <p style={{ color: 'var(--inkcloud)', textAlign: 'center', marginBottom: 18 }}>{t('product.load_error')}</p>
@@ -406,6 +413,7 @@ const Prodotti: React.FC = () => {
 
       {renderSimpleGallery(t('product.dishes_title'), availableItems, 'strip-dishes')}
     </div>
+    </>
   );
 };
 

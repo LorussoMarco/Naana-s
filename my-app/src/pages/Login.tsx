@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-// react-router's useNavigate is optional for this component; we don't require it.
+import AuthService from '../services/AuthService';
+import SEO from '../services/SEO';
 
 const Login: React.FC = () => {
-  // react-router navigation is optional here; we fallback to window.location
-  // so we don't rely on the router instance in this small example.
-
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,19 +28,24 @@ const Login: React.FC = () => {
       });
       const json = await resp.json();
       setLoading(false);
-        if (!resp.ok) {
+      
+      if (!resp.ok) {
         setError(json && json.error ? json.error : t('auth.login_error'));
         return;
       }
 
-      // save JWT token in localStorage
+      // Store token securely using AuthService
       if (json.token) {
-        localStorage.setItem('token', json.token);
+        AuthService.setToken({
+          token: json.token,
+          refreshToken: json.refreshToken,
+          expiresIn: json.expiresIn ? json.expiresIn * 1000 : undefined
+        });
       }
 
       // redirect after login
       if (typeof window !== 'undefined' && (window as any).location) {
-        window.location.href = '/product';
+        window.location.href = '/';
       }
     } catch (err: any) {
       setLoading(false);
@@ -51,7 +54,14 @@ const Login: React.FC = () => {
   };
 
   return (
-    <main style={styles.root}>
+    <>
+      <SEO
+        title="Login | Naana's Kitchen"
+        description="Area riservata per i partner di Naana's Kitchen. Accedi per gestire i prodotti e gli ordini."
+        url="https://naanaskitchen.com/login"
+        type="website"
+      />
+      <main style={styles.root}>
       <div style={styles.card}>
         <h1 style={styles.title}>{t('auth.login')}</h1>
         <br></br>
@@ -88,6 +98,7 @@ const Login: React.FC = () => {
         </form>
       </div>
     </main>
+    </>
   );
 };
 

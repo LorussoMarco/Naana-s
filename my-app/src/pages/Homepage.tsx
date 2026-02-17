@@ -8,6 +8,10 @@ import imgC from '../assets/c.jpg';
 import home3 from '../assets/home3.jpg';
 import bImg from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
+import catCarne from '../assets/carne.jpg';
+import catPesce from '../assets/pesce.jpg';
+import catVegetariana from '../assets/vegetariana.jpg';
+import catDessert from '../assets/dessert.jpg';
 import '../styles/homepage.css';
 
 interface Photo {
@@ -521,28 +525,28 @@ const Homepage: React.FC = () => {
                 className={`category-btn ${selectedCategory === 'carne' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(selectedCategory === 'carne' ? null : 'carne')}
               >
-                <span className="category-icon">🥩</span>
+                <img src={catCarne} alt="Carne" className="category-icon-img" />
                 Carne
               </button>
               <button
                 className={`category-btn ${selectedCategory === 'pesce' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(selectedCategory === 'pesce' ? null : 'pesce')}
               >
-                <span className="category-icon">🐟</span>
+                <img src={catPesce} alt="Pesce" className="category-icon-img" />
                 Pesce
               </button>
               <button
                 className={`category-btn ${selectedCategory === 'vegetariano' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(selectedCategory === 'vegetariano' ? null : 'vegetariano')}
               >
-                <span className="category-icon">🥗</span>
+                <img src={catVegetariana} alt="Vegetariano" className="category-icon-img" />
                 Vegetariano
               </button>
               <button
                 className={`category-btn ${selectedCategory === 'dessert' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(selectedCategory === 'dessert' ? null : 'dessert')}
               >
-                <span className="category-icon">🍰</span>
+                <img src={catDessert} alt="Dessert" className="category-icon-img" />
                 Dessert
               </button>
             </div>

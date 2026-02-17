@@ -11,7 +11,7 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
   onStepChange?: (step: number) => void;
   onFinalStepCompleted?: () => void;
   /**
-   * Called before moving to a new step. Return `true` (or a resolving Promise to `true`) to allow
+   * Called before moving to a new step. Return `true` (or a resolving Promise to `true`) to allow aa
    * the transition, or `false` to block it. Only invoked when attempting to move forward.
    */
   onBeforeStepChange?: (currentStep: number, targetStep: number) => boolean | Promise<boolean>;

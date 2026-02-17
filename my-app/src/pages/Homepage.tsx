@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import SecureHttpClient from '../services/SecureHttpClient';
 import SEO from '../services/SEO';
@@ -8,6 +8,7 @@ import imgC from '../assets/c.jpg';
 import home3 from '../assets/home3.jpg';
 import bImg from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
+import '../styles/homepage.css';
 
 interface Photo {
   url: string;
@@ -168,8 +169,9 @@ const Homepage: React.FC = () => {
     padding: 0,
   };
 
-  // Paginated gallery with navigation
-  const renderPaginatedGallery = (title: string, list: Item[], currentPage: number, totalPages: number, ariaId: string) => {
+  // Paginated gallery with navigation – wrapped in useCallback to avoid
+  // recreating the function (and its inline JSX) on every render.
+  const renderPaginatedGallery = useCallback((title: string, list: Item[], currentPage: number, totalPages: number, ariaId: string) => {
     if (!list || list.length === 0) {
       return (
         <section style={{ marginBottom: 28 }} aria-labelledby={ariaId}>
@@ -211,7 +213,7 @@ const Homepage: React.FC = () => {
         )}
       </section>
     );
-  };
+  }, [setCurrentPage]);
 
   return (
     <>
@@ -494,234 +496,6 @@ const Homepage: React.FC = () => {
       </section>
 
       {/* Products Gallery Section */}
-      <style>{`
-        .category-filters {
-          display: flex;
-          justify-content: center;
-          gap: 24px;
-          margin-bottom: 40px;
-          flex-wrap: wrap;
-          padding: 0 16px;
-        }
-
-        .category-btn {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          padding: 16px;
-          border: 2px solid transparent;
-          border-radius: 12px;
-          background: var(--mossmilk, #f9f9f9);
-          cursor: pointer;
-          transition: border-color 0.2s ease, background 0.2s ease;
-          min-width: 100px;
-          font-size: 14px;
-          color: var(--inkcloud, #333);
-          font-weight: 600;
-          will-change: border-color, background;
-        }
-
-        .category-btn:hover {
-          border-color: #d4a574;
-        }
-
-        .category-btn.active {
-          border-color: #d4a574;
-          background: linear-gradient(135deg, rgba(212,165,116,0.1), rgba(212,165,116,0.05));
-          color: #d4a574;
-        }
-
-        .category-icon {
-          font-size: 32px;
-        }
-
-        .homepage-gallery-wrapper {
-          position: relative;
-          display: flex;
-          align-items: center;
-          padding: 0 40px;
-          contain: layout style;
-        }
-
-        .homepage-gallery-arrow {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 10;
-          background: var(--inkcloud, #333);
-          color: white;
-          border: none;
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          font-size: 28px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          transition: background 0.15s ease;
-          will-change: background;
-          backface-visibility: hidden;
-        }
-
-        .homepage-gallery-arrow:hover {
-          background: #555;
-        }
-
-        .homepage-gallery-arrow-left {
-          left: 0;
-        }
-
-        .homepage-gallery-arrow-right {
-          right: 0;
-        }
-
-        .homepage-simple-gallery {
-          display: flex;
-          gap: 24px;
-          padding: 20px 10px;
-          overflow-x: auto;
-          scroll-behavior: smooth;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          contain: layout;
-        }
-
-        .homepage-simple-gallery::-webkit-scrollbar {
-          display: none;
-        }
-
-        .homepage-gallery-item {
-          flex: 0 0 280px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 20px;
-          background: var(--mossmilk, #f9f9f9);
-          border-radius: 16px;
-          box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-          transition: none;
-          will-change: auto;
-          contain: layout style paint;
-          backface-visibility: hidden;
-          transform: translateZ(0);
-        }
-
-        .homepage-gallery-image-wrapper {
-          width: 100%;
-          height: 200px;
-          overflow: hidden;
-          border-radius: 12px;
-          margin-bottom: 16px;
-          contain: layout paint;
-        }
-
-        .homepage-gallery-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          transition: none;
-          will-change: auto;
-        }
-
-        .homepage-gallery-item-name {
-          margin: 0 0 8px 0;
-          font-size: 18px;
-          font-weight: 700;
-          color: var(--inkcloud, #333);
-          text-align: center;
-        }
-
-        .homepage-gallery-item-desc {
-          margin: 0;
-          font-size: 14px;
-          color: var(--inkcloud, #666);
-          text-align: center;
-          line-height: 1.4;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        @media (max-width: 768px) {
-          .category-filters {
-            gap: 16px;
-          }
-
-          .category-btn {
-            min-width: 90px;
-            padding: 12px;
-            font-size: 13px;
-          }
-
-          .category-icon {
-            font-size: 28px;
-          }
-
-          .homepage-gallery-wrapper {
-            padding: 0 30px;
-          }
-
-          .homepage-gallery-arrow {
-            width: 36px;
-            height: 36px;
-            font-size: 22px;
-          }
-
-          .homepage-gallery-item {
-            flex: 0 0 240px;
-            padding: 16px;
-          }
-
-          .homepage-gallery-image-wrapper {
-            height: 160px;
-          }
-
-          .homepage-gallery-item-name {
-            font-size: 16px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .category-filters {
-            gap: 12px;
-          }
-
-          .category-btn {
-            min-width: 80px;
-            padding: 10px;
-            font-size: 12px;
-          }
-
-          .category-icon {
-            font-size: 24px;
-          }
-
-          .homepage-gallery-wrapper {
-            padding: 0 24px;
-          }
-
-          .homepage-gallery-arrow {
-            width: 32px;
-            height: 32px;
-            font-size: 18px;
-          }
-
-          .homepage-gallery-item {
-            flex: 0 0 200px;
-            padding: 12px;
-          }
-
-          .homepage-gallery-image-wrapper {
-            height: 140px;
-          }
-        }
-      `}</style>
 
       <section id="feature" style={styles.featureSection}>
         <div style={styles.featureLeft}>
@@ -732,7 +506,7 @@ const Homepage: React.FC = () => {
         <div style={styles.featureRight} />
       </section>
 
-      <div style={{ padding: '40px 16px' }}>
+      <div className="homepage-products-section" style={{ padding: '40px 16px' }}>
         {productsError && !productsLoading && (
           <p style={{ color: 'var(--inkcloud)', textAlign: 'center', marginBottom: 18 }}>{productsError}</p>
         )}
@@ -913,12 +687,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     filter: 'blur(4px) saturate(0.9) brightness(0.85)',
-    transform: 'scale(1.02)',
+    transform: 'scale(1.02) translateZ(0)',
+    backfaceVisibility: 'hidden' as const,
     pointerEvents: 'auto',
     display: 'flex',
     alignItems: 'flex-end',
     justifyContent: 'center',
     overflow: 'hidden',
+    contain: 'strict' as const,
   },
   stickyBgContainer: {
     position: 'absolute' as const,
@@ -1109,7 +885,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '28px',
     borderRadius: '16px',
     boxShadow: '0 4px 12px rgba(74,74,74,0.08)',
-    transition: 'transform 0.3s, box-shadow 0.3s',
     border: '1px solid rgba(212,165,116,0.1)',
     display: 'flex',
     flexDirection: 'column',

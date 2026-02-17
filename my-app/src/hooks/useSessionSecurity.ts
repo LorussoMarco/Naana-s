@@ -73,15 +73,9 @@ export const useSessionSecurity = (config: SessionSecurityConfig = {}) => {
     };
   }, [resetTimers]);
 
-  // Logout on window close
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      localStorage.removeItem('token');
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, []);
+  // Note: we do NOT clear auth on beforeunload, so the session
+  // survives page reloads and tab reopens. The inactivity timeout
+  // above already handles idle sessions.
 
   return {};
 };

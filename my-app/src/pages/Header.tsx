@@ -16,9 +16,8 @@ const Header: React.FC<HeaderProps> = ({
     const [isAuthed, setIsAuthed] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     useEffect(() => {
-        const t = localStorage.getItem('token');
-        setIsAuthed(!!t);
-        const onStorage = () => setIsAuthed(!!localStorage.getItem('token'));
+        setIsAuthed(AuthService.isAuthenticated());
+        const onStorage = () => setIsAuthed(AuthService.isAuthenticated());
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
     }, []);

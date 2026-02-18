@@ -200,8 +200,8 @@ h3 { font-size: clamp(1rem, 2.5vw, 1.5rem); }
 
   /* If there are two buttons, offset the second slightly to the right */
   .sticky-wrap .menu-button.primary {
-    left: calc(50% + 140px) !important;
-    transform: translateX(-40%) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
   }
 }
 

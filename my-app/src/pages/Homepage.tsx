@@ -4,7 +4,6 @@ import SecureHttpClient from '../services/SecureHttpClient';
 import SEO from '../services/SEO';
 import { localBusinessSchema } from '../services/jsonLD';
 import bg from '../assets/d.jpg';
-import imgC from '../assets/c.jpg';
 import home3 from '../assets/home3.jpg';
 import bImg from '../assets/c.jpg';
 import Stepper, { Step } from '../Component/Stepper';
@@ -502,12 +501,7 @@ const Homepage: React.FC = () => {
       {/* Products Gallery Section */}
 
       <section id="feature" style={styles.featureSection}>
-        <div style={styles.featureLeft}>
-          <h3 style={styles.featureTitle}>{t('homepage.feature_title')}</h3>
-          <p style={styles.featureText}>{t('homepage.feature_text')}</p>
-        </div>
-
-        <div style={styles.featureRight} />
+        <p style={styles.featureText}>{t('homepage.feature_text')}</p>
       </section>
 
       <div className="homepage-products-section" style={{ padding: '40px 16px' }}>
@@ -788,38 +782,22 @@ const styles: { [key: string]: React.CSSProperties } = {
     boxSizing: 'border-box',
   },
   featureSection: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    display: 'flex',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 24,
     padding: '64px 16px',
     maxWidth: '1100px',
     margin: '0 auto',
   },
-  featureLeft: {
-    paddingRight: 12,
-  },
-  featureRight: {
-    backgroundImage: `url(${imgC})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    borderRadius: 12,
-    minHeight: 320,
-    boxShadow: '0 6px 18px rgba(74,74,74,0.06)',
-  },
-  featureTitle: {
-    margin: 0,
-    fontSize: 26,
-    color: 'var(--mossmilk)',
-    fontWeight: 700,
-    textShadow: '0 2px 6px rgba(74,74,74,0.45)',
-    letterSpacing: 0.2,
-  },
   featureText: {
-    marginTop: 12,
+    margin: 0,
+    fontSize: 18,
     color: 'var(--inkcloud)',
-    maxWidth: 560,
-    lineHeight: 1.6,
+    fontWeight: 400,
+    lineHeight: 1.7,
+    textAlign: 'center' as const,
+    maxWidth: 700,
+    whiteSpace: 'pre-line' as const,
   },
   coverSection: {
     display: 'grid',

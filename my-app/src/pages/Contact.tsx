@@ -70,7 +70,7 @@ const Contact: React.FC = () => {
 
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>{t('contact.social_title')}</h3>
-            <p style={styles.cardText}>Instagram: <a href="#" style={styles.link}>@naanaskitchen</a><br/>Facebook: <a href="#" style={styles.link}>Naana's Kitchen</a></p>
+            <p style={styles.cardText}>Instagram: <a href="#" style={styles.link}>@naanaskitchen</a><br/>Facebook: <a href="https://www.facebook.com/share/1Ar4do63hE/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" style={styles.link}>Naana's Kitchen</a></p>
           </div>
         </div>
 

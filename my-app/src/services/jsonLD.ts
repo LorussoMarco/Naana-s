@@ -21,7 +21,7 @@ export const organizationSchema = {
     addressCountry: 'IT',
   },
   sameAs: [
-    'https://www.facebook.com/naanaskitchen',
+    'https://www.facebook.com/share/1Ar4do63hE/?mibextid=wwXIfr',
     'https://www.instagram.com/naanaskitchen',
   ],
   contactPoint: {

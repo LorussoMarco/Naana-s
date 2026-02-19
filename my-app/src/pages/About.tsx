@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import SEO from '../services/SEO';
-import aImg from '../assets/c.jpg';
-import bImg from '../assets/c.jpg';
+import aImg from '../assets/doris.jpeg';
+import bImg from '../assets/nerina.jpeg';
 
 const About: React.FC = () => {
   const { t } = useTranslation();
@@ -86,8 +86,7 @@ const styles: { [k: string]: React.CSSProperties } = {
   },
   img: {
     width: '100%',
-    height: 180,
-    objectFit: 'cover',
+    height: 'auto',
     display: 'block',
   },
   caption: {

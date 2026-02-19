@@ -500,10 +500,6 @@ const Homepage: React.FC = () => {
 
       {/* Products Gallery Section */}
 
-      <section id="feature" style={styles.featureSection}>
-        <p style={styles.featureText}>{t('homepage.feature_text')}</p>
-      </section>
-
       <div className="homepage-products-section" style={{ padding: '40px 16px' }}>
         {productsError && !productsLoading && (
           <p style={{ color: 'var(--inkcloud)', textAlign: 'center', marginBottom: 18 }}>{productsError}</p>
@@ -513,7 +509,16 @@ const Homepage: React.FC = () => {
             <h2 style={{ textAlign: 'center', marginBottom: 32, color: 'var(--inkcloud)', fontSize: 24 }}>
               {t('product.dishes_title')}
             </h2>
-            
+            <div style={{
+              maxWidth: 600,
+              margin: '0 auto 32px',
+              textAlign: 'center',
+              color: 'var(--inkcloud)',
+              fontSize: 18,
+              lineHeight: 1.5
+            }}>
+              {t('homepage.menu_intro')}
+            </div>
             <div className="category-filters">
               <button
                 className={`category-btn ${selectedCategory === 'carne' ? 'active' : ''}`}
@@ -652,7 +657,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: 'auto',
     borderRadius: 12,
     boxShadow: '0 6px 18px rgba(16,24,40,0.06)',
-    objectFit: 'cover',
+    // objectFit rimosso per mostrare l'immagine nella sua forma originale
   },
   scrollNav: {
     position: 'sticky',
@@ -781,24 +786,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     minHeight: 44,
     boxSizing: 'border-box',
   },
-  featureSection: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '64px 16px',
-    maxWidth: '1100px',
-    margin: '0 auto',
-  },
-  featureText: {
-    margin: 0,
-    fontSize: 18,
-    color: 'var(--inkcloud)',
-    fontWeight: 400,
-    lineHeight: 1.7,
-    textAlign: 'center' as const,
-    maxWidth: 700,
-    whiteSpace: 'pre-line' as const,
-  },
+  // ...existing code...
   coverSection: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',

@@ -509,16 +509,6 @@ const Homepage: React.FC = () => {
             <h2 style={{ textAlign: 'center', marginBottom: 32, color: 'var(--inkcloud)', fontSize: 24 }}>
               {t('product.dishes_title')}
             </h2>
-            <div style={{
-              maxWidth: 600,
-              margin: '0 auto 32px',
-              textAlign: 'center',
-              color: 'var(--inkcloud)',
-              fontSize: 18,
-              lineHeight: 1.5
-            }}>
-              {t('homepage.menu_intro')}
-            </div>
             <div className="category-filters">
               <button
                 className={`category-btn ${selectedCategory === 'carne' ? 'active' : ''}`}

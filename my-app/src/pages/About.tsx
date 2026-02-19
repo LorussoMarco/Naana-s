@@ -85,9 +85,13 @@ const styles: { [k: string]: React.CSSProperties } = {
     boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
   },
   img: {
-    width: '100%',
-    height: 'auto',
+    width: '180px',
+    height: '260px',
+    objectFit: 'cover',
     display: 'block',
+    margin: '0 auto',
+    borderRadius: 8,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
   },
   caption: {
     padding: '10px 12px',

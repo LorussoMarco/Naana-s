@@ -25,19 +25,6 @@ const About: React.FC = () => {
             </React.Fragment>
           ))}
         </p>
-
-        <div style={styles.grid}>
-          <figure style={styles.figure}>
-            <img src={aImg} alt={t('about.figure1')} style={styles.img} />
-            <figcaption style={styles.caption}>{t('about.figure1')}</figcaption>
-          </figure>
-
-          <figure style={styles.figure}>
-            <img src={bImg} alt={t('about.figure2')} style={styles.img} />
-            <figcaption style={styles.caption}>{t('about.figure2')}</figcaption>
-          </figure>
-        </div>
-
         <p style={styles.text}>
           {t('about.text').split('\n').map((line, i) => (
             <React.Fragment key={i}>
@@ -46,6 +33,19 @@ const About: React.FC = () => {
             </React.Fragment>
           ))}
         </p>
+        <div style={styles.grid}>
+          <figure style={styles.figure}>
+            <img src={aImg} alt="Doris" style={styles.img} loading="lazy" />
+            <figcaption style={styles.caption}>{t('about.figure1')}</figcaption>
+          </figure>
+
+          <figure style={styles.figure}>
+            <img src={bImg} alt="Nerina" style={styles.img} loading="lazy" />
+            <figcaption style={styles.caption}>{t('about.figure2')}</figcaption>
+          </figure>
+        </div>
+
+
       </div>
     </section>
     </>
@@ -73,29 +73,28 @@ const styles: { [k: string]: React.CSSProperties } = {
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-    gap: 16,
-    marginBottom: 20,
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: 32,
+    marginBottom: 32,
   },
   figure: {
     margin: 0,
-    background: 'white',
-    borderRadius: 10,
-    overflow: 'hidden',
-    boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
+    textAlign: 'center' as const,
   },
   img: {
-    width: '180px',
-    height: '260px',
+    width: '100%',
+    maxWidth: 400,
+    height: 'auto',
+    aspectRatio: '3 / 4',
     objectFit: 'cover',
     display: 'block',
     margin: '0 auto',
-    borderRadius: 8,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+    borderRadius: 12,
   },
   caption: {
-    padding: '10px 12px',
-    fontSize: 14,
+    padding: '12px 0',
+    fontSize: 16,
+    fontWeight: 600,
     color: 'var(--inkcloud)',
   },
   text: {

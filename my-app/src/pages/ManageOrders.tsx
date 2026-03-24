@@ -25,11 +25,28 @@ interface Order {
   event_type?: string | null;
 }
 
+interface Review {
+  id: number;
+  name: string;
+  event_type?: string | null;
+  rating: number;
+  text: string;
+  approved: boolean;
+  created_at: string;
+  order_id?: number | null;
+}
+
 const ManageOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'orders' | 'reviews'>('orders');
+
+  // Reviews state
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -46,9 +63,47 @@ const ManageOrders: React.FC = () => {
     }
   };
 
+  const fetchReviews = async () => {
+    setReviewsLoading(true);
+    setReviewsError(null);
+    try {
+      const res = await SecureHttpClient.get('/reviews/all');
+      if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
+      const data = await res.json();
+      setReviews(data || []);
+    } catch (e: any) {
+      setReviewsError(e.message || 'Errore caricamento review');
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
+    fetchReviews();
   }, []);
+
+  const approveReview = async (id: number) => {
+    try {
+      await SecureHttpClient.put(`/reviews/${id}`, { approved: true });
+      fetchReviews();
+    } catch (e) { console.error(e); }
+  };
+
+  const rejectReview = async (id: number) => {
+    try {
+      await SecureHttpClient.put(`/reviews/${id}`, { approved: false });
+      fetchReviews();
+    } catch (e) { console.error(e); }
+  };
+
+  const deleteReview = async (id: number) => {
+    if (!confirm('Sei sicuro di voler eliminare questa review?')) return;
+    try {
+      await SecureHttpClient.delete(`/reviews/${id}`);
+      fetchReviews();
+    } catch (e) { console.error(e); }
+  };
 
   const confirmOrder = async (id: number) => {
     try {
@@ -90,10 +145,48 @@ const ManageOrders: React.FC = () => {
     );
   });
 
+  const pendingReviewsCount = reviews.filter(r => !r.approved).length;
+
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: 20 }}>
-      <h1 style={{ marginBottom: 6 }}>Gestisci ordini</h1>
-      <p style={{ marginTop: 0, color: '#555' }}>Visualizza, conferma o elimina le ordinazioni</p>
+      <h1 style={{ marginBottom: 6 }}>Pannello Admin</h1>
+
+      {/* Tab navigation */}
+      <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '2px solid #e5e7eb' }}>
+        <button
+          onClick={() => setActiveTab('orders')}
+          style={{
+            padding: '12px 24px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14,
+            background: activeTab === 'orders' ? '#111827' : 'transparent',
+            color: activeTab === 'orders' ? '#fff' : '#555',
+            borderRadius: '8px 8px 0 0',
+          }}
+        >
+          Ordini ({orders.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('reviews')}
+          style={{
+            padding: '12px 24px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14,
+            background: activeTab === 'reviews' ? '#111827' : 'transparent',
+            color: activeTab === 'reviews' ? '#fff' : '#555',
+            borderRadius: '8px 8px 0 0',
+            position: 'relative',
+          }}
+        >
+          Review ({reviews.length})
+          {pendingReviewsCount > 0 && (
+            <span style={{
+              position: 'absolute', top: 4, right: 4, background: '#ef4444', color: '#fff',
+              borderRadius: 999, padding: '2px 7px', fontSize: 11, fontWeight: 700,
+            }}>{pendingReviewsCount}</span>
+          )}
+        </button>
+      </div>
+
+      {activeTab === 'orders' && (
+        <>
+          <p style={{ marginTop: 0, color: '#555' }}>Visualizza, conferma o elimina le ordinazioni</p>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center' }}>
         <input
@@ -155,6 +248,52 @@ const ManageOrders: React.FC = () => {
           </div>
         ))}
       </div>
+        </>
+      )}
+
+      {activeTab === 'reviews' && (
+        <>
+          <p style={{ marginTop: 0, color: '#555' }}>Modera le review dei clienti</p>
+          {reviewsLoading && <div>Caricamento review...</div>}
+          {reviewsError && <div style={{ color: 'crimson' }}>{reviewsError}</div>}
+          <div style={{ display: 'grid', gap: 14 }}>
+            {reviews.length === 0 && !reviewsLoading && <div style={{ color: '#666' }}>Nessuna review trovata.</div>}
+            {reviews.map((r) => (
+              <div key={r.id} style={{ padding: 14, background: '#fff', borderRadius: 10, boxShadow: '0 8px 30px rgba(2,6,23,0.06)', border: r.approved ? '1px solid rgba(2,6,23,0.04)' : '2px solid #fbbf24' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong style={{ fontSize: 16 }}>{r.name}</strong>
+                    <span style={{ marginLeft: 8, fontSize: 12, color: '#888' }}>{r.event_type || ''}</span>
+                    <div style={{ marginTop: 4 }}>
+                      <ReviewStatusBadge approved={r.approved} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {!r.approved && <ActionButton onClick={() => approveReview(r.id)} label="Approva" />}
+                    {r.approved && <ActionButton onClick={() => rejectReview(r.id)} label="Nascondi" />}
+                    <ActionButton onClick={() => deleteReview(r.id)} label="Elimina" danger />
+                  </div>
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ display: 'flex', gap: 2, marginBottom: 4 }}>
+                    {Array(r.rating).fill(0).map((_, i) => (
+                      <span key={i} style={{ color: '#d4a574', fontSize: 14 }}>★</span>
+                    ))}
+                    {Array(5 - r.rating).fill(0).map((_, i) => (
+                      <span key={i} style={{ color: '#ddd', fontSize: 14 }}>★</span>
+                    ))}
+                  </div>
+                  <p style={{ margin: 0, color: '#333', fontSize: 14, lineHeight: 1.5 }}>"{r.text}"</p>
+                  <p style={{ marginTop: 4, fontSize: 12, color: '#999' }}>
+                    {new Date(r.created_at).toLocaleDateString('it-IT')}
+                    {r.order_id ? ` — Ordine #${r.order_id}` : ''}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -168,6 +307,13 @@ function StatusBadge({ status }: { status: string }) {
   };
   const s = map[status] || { color: '#374151', bg: '#F3F4F6' };
   return <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 999, background: s.bg, color: s.color, fontSize: 12 }}>{status}</span>;
+}
+
+function ReviewStatusBadge({ approved }: { approved: boolean }) {
+  const s = approved
+    ? { color: '#047857', bg: '#ECFDF5', label: 'Approvata' }
+    : { color: '#92400e', bg: '#FEF3C7', label: 'In attesa' };
+  return <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 999, background: s.bg, color: s.color, fontSize: 12 }}>{s.label}</span>;
 }
 
 function ActionButton({ onClick, label, danger }: { onClick: () => void; label: string; danger?: boolean }) {

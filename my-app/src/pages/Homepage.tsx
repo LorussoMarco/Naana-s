@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import SecureHttpClient from '../services/SecureHttpClient';
 import SEO from '../services/SEO';
@@ -6,15 +6,22 @@ import { localBusinessSchema } from '../services/jsonLD';
 import bg from '../assets/d.jpg';
 import home3 from '../assets/home3.jpg';
 import bImg from '../assets/c.jpg';
-import Stepper, { Step } from '../Component/Stepper';
 import catCarne from '../assets/carne.jpg';
 import catPesce from '../assets/pesce.jpg';
 import catVegetariana from '../assets/vegetariana.jpg';
 import catDessert from '../assets/dessert.jpg';
 import '../styles/homepage.css';
 
+// Lazy load Stepper (only shown in modal)
+const LazyStepper = lazy(() => import('../Component/Stepper'));
+// Step is a named export — import it statically since it's just a wrapper
+import { Step } from '../Component/Stepper';
+
 interface Photo {
   url: string;
+  sm?: string;
+  md?: string;
+  lg?: string;
   caption?: string;
 }
 
@@ -33,24 +40,34 @@ interface GalleryItemProps {
   bImg: string;
 }
 
-const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => (
-  <div className="homepage-gallery-item">
-    <div className="homepage-gallery-image-wrapper">
-      <img 
-        src={(item.photos && item.photos[0] && item.photos[0].url) || bImg} 
-        alt={item.name || 'Prodotto'} 
-        className="homepage-gallery-image"
-        loading="lazy"
-        decoding="async"
-        fetchPriority="low"
-      />
+const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => {
+  const photo = item.photos && item.photos[0];
+  const src = photo?.md || photo?.url || bImg;
+  const srcSet = photo?.sm && photo?.md && photo?.lg
+    ? `${photo.sm} 400w, ${photo.md} 800w, ${photo.lg} 1200w`
+    : undefined;
+
+  return (
+    <div className="homepage-gallery-item">
+      <div className="homepage-gallery-image-wrapper">
+        <img 
+          src={src} 
+          srcSet={srcSet}
+          sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"
+          alt={item.name || 'Prodotto'} 
+          className="homepage-gallery-image"
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+        />
+      </div>
+      <h3 className="homepage-gallery-item-name">{item.name || 'Prodotto'}</h3>
+      {item.description && (
+        <p className="homepage-gallery-item-desc">{item.description}</p>
+      )}
     </div>
-    <h3 className="homepage-gallery-item-name">{item.name || 'Prodotto'}</h3>
-    {item.description && (
-      <p className="homepage-gallery-item-desc">{item.description}</p>
-    )}
-  </div>
-));
+  );
+});
 
 const Homepage: React.FC = () => {
   const { t } = useTranslation();
@@ -63,6 +80,25 @@ const Homepage: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
+
+  // Reviews state
+  interface Review {
+    id: number;
+    name: string;
+    event_type?: string | null;
+    rating: number;
+    text: string;
+    created_at: string;
+  }
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewName, setReviewName] = useState('');
+  const [reviewEventType, setReviewEventType] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   
   // Step 1 - client
   const [firstName, setFirstName] = useState('');
@@ -99,7 +135,18 @@ const Homepage: React.FC = () => {
         } else {
           const mapped: Item[] = data.map((d: any) => {
             const imagesSource = Array.isArray(d.images) ? d.images : Array.isArray(d.photos) ? d.photos : [];
-            const photos: Photo[] = imagesSource.length ? imagesSource.map((p: any) => ({ url: p.url || p })) : [{ url: bImg }];
+            const photos: Photo[] = imagesSource.length ? imagesSource.map((p: any) => {
+              if (typeof p === 'string') return { url: p };
+              if (p && typeof p === 'object' && (p.original || p.url)) {
+                return {
+                  url: p.original || p.url || p,
+                  sm: p.sm || undefined,
+                  md: p.md || undefined,
+                  lg: p.lg || undefined,
+                };
+              }
+              return { url: p.url || p };
+            }) : [{ url: bImg }];
             return {
               _id: d.id ? String(d.id) : (d._id ? String(d._id) : ''),
               name: d.name || '',
@@ -130,6 +177,55 @@ const Homepage: React.FC = () => {
     };
     fetchItems();
   }, [t]);
+
+  // Fetch reviews on mount
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await SecureHttpClient.get('/reviews', { skipAuth: true });
+        const data = await res.json();
+        if (Array.isArray(data)) setReviews(data);
+      } catch (err) {
+        console.error('Failed to fetch reviews:', err);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  const handleReviewSubmit = async () => {
+    setReviewError(null);
+    setReviewSuccess(null);
+    if (!reviewName.trim() || !reviewText.trim()) {
+      setReviewError(t('reviews.fill_required'));
+      return;
+    }
+    setReviewSubmitting(true);
+    try {
+      const res = await SecureHttpClient.post('/reviews', {
+        name: reviewName,
+        event_type: reviewEventType || null,
+        rating: reviewRating,
+        text: reviewText,
+      }, { skipAuth: true });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Errore invio');
+      }
+      setReviewSuccess(t('reviews.submit_success'));
+      setReviewName('');
+      setReviewEventType('');
+      setReviewRating(5);
+      setReviewText('');
+      setTimeout(() => {
+        setShowReviewForm(false);
+        setReviewSuccess(null);
+      }, 2000);
+    } catch (e: any) {
+      setReviewError(e.message || t('reviews.submit_error'));
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   // Reset page when category changes
   useEffect(() => {
@@ -229,7 +325,7 @@ const Homepage: React.FC = () => {
       />
       <main style={styles.root}>
       <header style={styles.hero}>
-          <div style={styles.heroInner}>
+        <div style={styles.heroInner}>
           <div style={styles.heroText}>
             <h1 style={styles.title}>{t('homepage.hero_title')}</h1>
             <p style={styles.lead}>{t('homepage.hero_lead')}</p>
@@ -241,8 +337,7 @@ const Homepage: React.FC = () => {
 
       {/* Sticky blurred background image: stays in place while sections scroll over it */}
       <div style={styles.stickyWrap} className="sticky-wrap">
-        <div style={styles.stickyBgContainer} className="sticky-bg">
-        </div>
+        <img src={home3} alt="" aria-hidden="true" loading="lazy" decoding="async" className="stickyBgImg" style={styles.stickyBgImg} />
         <button
           onClick={() => setShowStepper(true)}
           className="primary menu-button"
@@ -272,7 +367,8 @@ const Homepage: React.FC = () => {
             </div>
 
             <div style={{ width: 'min(860px, 96vw)', padding: 8 }}>
-              <Stepper
+              <Suspense fallback={<div style={{ textAlign: 'center', padding: 40, color: '#666' }}>Caricamento...</div>}>
+              <LazyStepper
                 initialStep={1}
                 onStepChange={(step) => console.log(step)}
                     onBeforeStepChange={async (currentStep, targetStep) => {
@@ -482,7 +578,8 @@ const Homepage: React.FC = () => {
                     {submitting && <div>{t('stepper.sending')}</div>}
                   </div>
                 </Step>
-              </Stepper>
+              </LazyStepper>
+              </Suspense>
             </div>
           </div>
         </div>
@@ -490,9 +587,11 @@ const Homepage: React.FC = () => {
 
       {/* Cover section: left half image (uses a.png), right half title + description.
           When this section scrolls into view it will overlay the blurred background. */}
-      <section id="cover" style={styles.coverSection}>
-        <div style={styles.coverLeft} />
-        <div style={styles.coverRight}>
+      <section id="cover" style={styles.coverSection} className="coverSection">
+        <div style={styles.coverLeft} className="coverLeft">
+          <img src={bg} alt="" aria-hidden="true" loading="lazy" decoding="async" className="coverLeftImg" style={styles.coverLeftImg} />
+        </div>
+        <div style={styles.coverRight} className="coverRight">
           <h2 style={styles.coverTitle}>{t('homepage.cover_title')}</h2>
           <p style={styles.coverText}>{t('homepage.cover_text')}</p>
         </div>
@@ -558,43 +657,93 @@ const Homepage: React.FC = () => {
           <p style={styles.reviewsSubtitle}>{t('reviews.subtitle')}</p>
           
           <div style={styles.reviewsGrid}>
-            {[
-              {
-                name: 'Francesca M.',
-                role: 'Wedding Event',
-                text: 'Naana\'s Kitchen ha trasformato il nostro matrimonio in un\'esperienza indimenticabile. Ogni piatto era una sorpresa, ogni dettaglio perfetto.',
-                rating: 5
-              },
-              {
-                name: 'Marco L.',
-                role: 'Corporate Event',
-                text: 'Professionalità, eleganza e gusto eccezionale. I nostri ospiti ancora ne parlano. Consigliatissimo per eventi aziendali.',
-                rating: 5
-              },
-              {
-                name: 'Elena R.',
-                role: 'Intimate Dinner',
-                text: 'Un\'esperienza culinaria che va oltre il semplice catering. Dori e Nerina creano arte in ogni piatto.',
-                rating: 5
-              },
-              {
-                name: 'Paolo T.',
-                role: 'Birthday Celebration',
-                text: 'Dalla prima consultazione al giorno dell\'evento, tutto è stato curato nei minimi dettagli. Grazie Naana\'s Kitchen!',
-                rating: 5
-              }
-            ].map((review, idx) => (
-              <div key={idx} style={styles.reviewCard}>
+            {reviews.length > 0 ? reviews.map((review) => (
+              <div key={review.id} style={styles.reviewCard}>
                 <div style={styles.reviewRating}>
                   {Array(review.rating).fill(0).map((_, i) => (
                     <span key={i} style={{ color: '#d4a574', fontSize: 16, marginRight: 2 }}>★</span>
                   ))}
+                  {Array(5 - review.rating).fill(0).map((_, i) => (
+                    <span key={i} style={{ color: '#ddd', fontSize: 16, marginRight: 2 }}>★</span>
+                  ))}
                 </div>
                 <p style={styles.reviewText}>"{review.text}"</p>
                 <p style={styles.reviewAuthor}>{review.name}</p>
-                <p style={styles.reviewRole}>{review.role}</p>
+                {review.event_type && <p style={styles.reviewRole}>{review.event_type}</p>}
               </div>
-            ))}
+            )) : (
+              <p style={{ textAlign: 'center', color: '#666', gridColumn: '1 / -1' }}>{t('reviews.no_reviews')}</p>
+            )}
+          </div>
+
+          {/* Review submission toggle */}
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
+            {!showReviewForm ? (
+              <button
+                onClick={() => setShowReviewForm(true)}
+                style={{ padding: '12px 28px', borderRadius: 8, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}
+              >
+                {t('reviews.write_review')}
+              </button>
+            ) : (
+              <div style={{ maxWidth: 500, margin: '0 auto', textAlign: 'left', background: '#fff', padding: 24, borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: 16 }}>{t('reviews.form_title')}</h3>
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <input
+                    placeholder={t('reviews.name_placeholder')}
+                    value={reviewName}
+                    onChange={(e) => setReviewName(e.target.value)}
+                    style={{ padding: '10px 12px', borderRadius: 6, border: '1px solid #ddd' }}
+                  />
+                  <input
+                    placeholder={t('reviews.event_placeholder')}
+                    value={reviewEventType}
+                    onChange={(e) => setReviewEventType(e.target.value)}
+                    style={{ padding: '10px 12px', borderRadius: 6, border: '1px solid #ddd' }}
+                  />
+                  <div>
+                    <label style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('reviews.rating_label')}</label>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewRating(star)}
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 24, color: star <= reviewRating ? '#d4a574' : '#ddd' }}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <textarea
+                    placeholder={t('reviews.text_placeholder')}
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    rows={4}
+                    maxLength={500}
+                    style={{ padding: '10px 12px', borderRadius: 6, border: '1px solid #ddd', resize: 'vertical' }}
+                  />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={handleReviewSubmit}
+                      disabled={reviewSubmitting}
+                      style={{ padding: '10px 20px', borderRadius: 6, background: '#111827', color: '#fff', border: 'none', cursor: reviewSubmitting ? 'not-allowed' : 'pointer', fontWeight: 600 }}
+                    >
+                      {reviewSubmitting ? t('reviews.submitting') : t('reviews.submit')}
+                    </button>
+                    <button
+                      onClick={() => { setShowReviewForm(false); setReviewError(null); setReviewSuccess(null); }}
+                      style={{ padding: '10px 20px', borderRadius: 6, background: '#e5e7eb', color: '#333', border: 'none', cursor: 'pointer' }}
+                    >
+                      {t('reviews.cancel')}
+                    </button>
+                  </div>
+                  {reviewError && <div style={{ color: 'crimson', fontSize: 14 }}>{reviewError}</div>}
+                  {reviewSuccess && <div style={{ color: 'green', fontSize: 14 }}>{reviewSuccess}</div>}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -676,9 +825,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '60vh',
     width: '100%',
     zIndex: 0,
-    backgroundImage: `url(${bg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
     filter: 'blur(4px) saturate(0.9) brightness(0.85)',
     transform: 'scale(1.02) translateZ(0)',
     backfaceVisibility: 'hidden' as const,
@@ -690,12 +836,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     contain: 'strict' as const,
   },
   stickyBgContainer: {
+    display: 'none',
+  },
+  stickyBgImg: {
     position: 'absolute' as const,
     inset: 0,
-    backgroundImage: `url(${home3})`,
-    backgroundSize: 'contain',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain' as const,
+    objectPosition: 'center',
   },
   stickyBgImage1: {
     display: 'none',
@@ -786,10 +935,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 15,
   },
   coverLeft: {
-    backgroundImage: `url(${bg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    filter: 'none',
+    position: 'relative' as const,
+    overflow: 'hidden',
+  },
+  coverLeftImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover' as const,
+    objectPosition: 'center',
+    display: 'block',
   },
   coverRight: {
     padding: '48px 32px',

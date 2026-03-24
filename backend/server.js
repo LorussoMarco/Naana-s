@@ -36,7 +36,7 @@ app.use((req, res, next) => {
   // CSP headers (Content Security Policy)
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;"
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;"
   );
   
   next();
@@ -69,18 +69,17 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
-// Supabase/Postgres client inizializzato in `supabaseClient.js`
-// facoltativo: semplice healthcheck per verificare la connessione alla tabella `users`
+// Health check for DB connectivity — no user data exposed
 app.get('/db-health', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('users').select('id').limit(1);
-    if (error) return res.status(500).json({ ok: false, error: error.message });
-    return res.json({ ok: true, sample: data });
+    const { error } = await supabase.from('users').select('id').limit(1);
+    if (error) return res.status(500).json({ ok: false });
+    return res.json({ ok: true });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(500).json({ ok: false });
   }
 });
 
@@ -100,6 +99,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/contact', contactRoutes);
+
+const reviewRoutes = require('./routes/reviews');
+app.use('/api/reviews', reviewRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

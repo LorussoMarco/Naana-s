@@ -23,9 +23,9 @@
   "about": {
     "title": "OUR STORY",
     "lead": "Naana's Kitchen was born from the desire to transform every table into a place of connection, emotion and taste.\n\nThe story of two women who, through passion, courage and resilience, have built a project — not just a business but a story of identity and vision.\n\nToday Naana's Kitchen specializes in catering for exclusive events, small celebrations, corporate parties.\n\nWe don't just cook to nourish.\nWe cook to create moments.\nMoments that smell of warmth, elegance and authenticity.\n\nMore than cooking, we create moments. Moments that last.",
-    "figure1": "Our team at work",
-    "figure2": "Artisanal kitchen with selected ingredients",
-    "text": "THE TEAM\n\nDORIS - founder\nNERINA - partner"
+    "figure1": "Doris - Founder",
+    "figure2": "Nerina - Partner",
+    "text": "THE TEAM\n"
   },
   "contact": {
     "title": "Contact Us",
@@ -100,6 +100,19 @@
   },
   "reviews": {
     "title": "What Our Guests Say",
-    "subtitle": "Real experiences from our events"
+    "subtitle": "Real experiences from our events",
+    "no_reviews": "No reviews yet. Be the first to share your experience!",
+    "write_review": "Write a Review",
+    "form_title": "Share Your Experience",
+    "name_placeholder": "Your name",
+    "event_placeholder": "Event type (e.g. Wedding, Birthday...)",
+    "rating_label": "Rating",
+    "text_placeholder": "Tell us about your experience (max 500 characters)",
+    "submit": "Submit Review",
+    "submitting": "Submitting...",
+    "cancel": "Cancel",
+    "fill_required": "Please fill in name and review text",
+    "submit_success": "Thank you! Your review will be published after approval.",
+    "submit_error": "Error submitting review"
   }
 }

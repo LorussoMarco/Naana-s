@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './pages/Header';
 import Footer from './pages/Footer';
 import Homepage from './pages/Homepage';
-import Contatti from './pages/Contact';
-import About from './pages/About';
-import Login from './pages/Login';
-import EditProducts from './pages/EditProducts';
-import ManageOrders from './pages/ManageOrders';
 import { useSessionSecurity } from './hooks/useSessionSecurity';
 import AuthService from './services/AuthService';
+
+// Lazy-load non-homepage routes
+const Contatti = lazy(() => import('./pages/Contact'));
+const About = lazy(() => import('./pages/About'));
+const Login = lazy(() => import('./pages/Login'));
+const EditProducts = lazy(() => import('./pages/EditProducts'));
+const ManageOrders = lazy(() => import('./pages/ManageOrders'));
 
 // Session warning modal component
 const SessionWarning: React.FC<{ show: boolean; onContinue: () => void }> = ({ show, onContinue }) => {
@@ -85,6 +87,7 @@ const App: React.FC = () => {
         <SessionWarning show={showSessionWarning} onContinue={handleContinueSession} />
         <Header />
         <main style={{ flex: 1, overflowY: 'auto' }}>
+          <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Caricamento...</div>}>
           <Routes>
             <Route path="/" element={<Homepage />} />
             <Route path="/contact" element={<Contatti />} />
@@ -93,6 +96,7 @@ const App: React.FC = () => {
             <Route path="/admin/products" element={<EditProducts />} />
             <Route path="/admin/orders" element={<ManageOrders />} />
           </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>

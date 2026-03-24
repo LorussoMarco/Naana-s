@@ -1,3 +1,66 @@
+/* --- Responsive: mobile & tablet homepage custom --- */
+@media (max-width: 900px) {
+  .coverSection, .cover-section, .homepage-cover-section {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: unset !important;
+    gap: 0 !important;
+  }
+  .coverLeft, .homepage-cover-left {
+    width: 100% !important;
+    min-height: 180px !important;
+    max-height: 260px !important;
+    overflow: hidden !important;
+    border-radius: 0 !important;
+  }
+  .coverLeftImg, .homepage-cover-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: 0 !important;
+    min-height: 180px !important;
+    max-height: 260px !important;
+    display: block !important;
+  }
+  .coverRight, .homepage-cover-right {
+    padding: 28px 10px !important;
+    border-radius: 0 0 12px 12px !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .homepage-gallery-item {
+    min-width: 160px !important;
+    max-width: 98vw !important;
+    padding: 8px !important;
+  }
+  .homepage-gallery-image-wrapper {
+    height: 100px !important;
+    min-height: 80px !important;
+    max-height: 120px !important;
+  }
+  .homepage-gallery-image {
+    border-radius: 8px !important;
+  }
+  .homepage-products-section {
+    padding: 18px 2vw !important;
+  }
+  .sticky-wrap {
+    height: 32vw !important;
+    min-height: 120px !important;
+    max-height: 180px !important;
+  }
+  .sticky-wrap img, .stickyBgImg {
+    object-fit: cover !important;
+    width: 100vw !important;
+    height: 100% !important;
+    min-height: 120px !important;
+    max-height: 180px !important;
+    border-radius: 0 !important;
+  }
+}
 /* ─── Category filters ─── */
 .category-filters {
   display: flex;

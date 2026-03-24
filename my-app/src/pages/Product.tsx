@@ -11,6 +11,9 @@ import bImg from '../assets/c.jpg';
 
 interface Photo {
   url: string;
+  sm?: string;
+  md?: string;
+  lg?: string;
   caption?: string;
 }
 
@@ -28,24 +31,34 @@ interface GalleryItemProps {
   bImg: string;
 }
 
-const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => (
-  <div className="gallery-item">
-    <div className="gallery-image-wrapper">
-      <img 
-        src={(item.photos && item.photos[0] && item.photos[0].url) || bImg} 
-        alt={item.name || 'Prodotto'} 
-        className="gallery-image"
-        loading="lazy"
-        decoding="async"
-        fetchPriority="low"
-      />
+const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => {
+  const photo = item.photos && item.photos[0];
+  const src = photo?.md || photo?.url || bImg;
+  const srcSet = photo?.sm && photo?.md && photo?.lg
+    ? `${photo.sm} 400w, ${photo.md} 800w, ${photo.lg} 1200w`
+    : undefined;
+
+  return (
+    <div className="gallery-item">
+      <div className="gallery-image-wrapper">
+        <img 
+          src={src}
+          srcSet={srcSet}
+          sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"
+          alt={item.name || 'Prodotto'} 
+          className="gallery-image"
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+        />
+      </div>
+      <h3 className="gallery-item-name">{item.name || 'Prodotto'}</h3>
+      {item.description && (
+        <p className="gallery-item-desc">{item.description}</p>
+      )}
     </div>
-    <h3 className="gallery-item-name">{item.name || 'Prodotto'}</h3>
-    {item.description && (
-      <p className="gallery-item-desc">{item.description}</p>
-    )}
-  </div>
-));
+  );
+});
 
 const Prodotti: React.FC = () => {
   const { t } = useTranslation();
@@ -65,7 +78,18 @@ const Prodotti: React.FC = () => {
         } else {
           const mapped: Item[] = data.map((d: any) => {
             const imagesSource = Array.isArray(d.images) ? d.images : Array.isArray(d.photos) ? d.photos : [];
-            const photos: Photo[] = imagesSource.length ? imagesSource.map((p: any) => ({ url: p.url || p })) : [{ url: bImg }];
+            const photos: Photo[] = imagesSource.length ? imagesSource.map((p: any) => {
+              if (typeof p === 'string') return { url: p };
+              if (p && typeof p === 'object' && (p.original || p.url)) {
+                return {
+                  url: p.original || p.url || p,
+                  sm: p.sm || undefined,
+                  md: p.md || undefined,
+                  lg: p.lg || undefined,
+                };
+              }
+              return { url: p.url || p };
+            }) : [{ url: bImg }];
             return {
               _id: d.id ? String(d.id) : (d._id ? String(d._id) : ''),
               name: d.name || '',

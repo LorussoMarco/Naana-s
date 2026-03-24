@@ -23,9 +23,9 @@
   "about": {
     "title": "LA NOSTRA STORIA",
     "lead": "Naana's Kitchen nasce dal desiderio di trasformare ogni tavola in un luogo di incontro, emozione e gusto.\n\nLa storia di due donne che, tra passione, coraggio e resilienza, hanno costruito un progetto — non solo di business ma una storia di identità e di visione.\n\nOggi Naana's Kitchen è specializzato in catering per eventi esclusivi, piccole celebrazioni, feste aziendali.\n\nNon cuciniamo solo per nutrire.\nCuciniamo per creare momenti.\nMomenti che profumano di calore, eleganza e autenticità.\n\nPiù che cucinare, creiamo momenti. Momenti che restano.",
-    "figure1": "Il nostro team al lavoro",
-    "figure2": "Cucina artigianale con ingredienti scelti",
-    "text": "IL TEAM\n\nDORIS - Fondatrice \nNERINA - Socia"
+    "figure1": "Doris - Fondatrice",
+    "figure2": "Nerina - Socia",
+    "text": "IL TEAM\n"
   },
   "contact": {
     "title": "Contattaci",
@@ -100,6 +100,19 @@
   },
   "reviews": {
     "title": "Quello che dicono i nostri ospiti",
-    "subtitle": "Esperienze reali dai nostri eventi"
+    "subtitle": "Esperienze reali dai nostri eventi",
+    "no_reviews": "Ancora nessuna review. Sii il primo a condividere la tua esperienza!",
+    "write_review": "Scrivi una Review",
+    "form_title": "Condividi la tua esperienza",
+    "name_placeholder": "Il tuo nome",
+    "event_placeholder": "Tipo di evento (es. Matrimonio, Compleanno...)",
+    "rating_label": "Valutazione",
+    "text_placeholder": "Raccontaci la tua esperienza (max 500 caratteri)",
+    "submit": "Invia Review",
+    "submitting": "Invio in corso...",
+    "cancel": "Annulla",
+    "fill_required": "Compila nome e testo della review",
+    "submit_success": "Grazie! La tua review sarà pubblicata dopo l'approvazione.",
+    "submit_error": "Errore nell'invio della review"
   }
 }

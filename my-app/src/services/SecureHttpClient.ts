@@ -1,4 +1,5 @@
 import AuthService from './AuthService';
+import { redirectToAdminLogin } from './adminAccess';
 
 /**
  * Secure HTTP Client
@@ -60,7 +61,7 @@ export class SecureHttpClient {
         } else {
           // Refresh failed, logout
           await AuthService.logout();
-          window.location.href = '/login';
+          redirectToAdminLogin();
           throw new Error('Session expired');
         }
       }
@@ -154,7 +155,7 @@ export class SecureHttpClient {
           return this.fetchFormData(endpoint, formData, options);
         } else {
           await AuthService.logout();
-          window.location.href = '/login';
+          redirectToAdminLogin();
           throw new Error('Session expired');
         }
       }

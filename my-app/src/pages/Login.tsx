@@ -2,13 +2,18 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AuthService from '../services/AuthService';
 import SEO from '../services/SEO';
+import { getAdminHomePath, getAdminLoginUrl, isAdminHost } from '../services/adminAccess';
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
+  const adminLoginUrl = getAdminLoginUrl();
+  const adminHomePath = getAdminHomePath();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  if (!isAdminHost()) return null;
 
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -24,6 +29,7 @@ const Login: React.FC = () => {
       const resp = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
       const json = await resp.json();
@@ -38,14 +44,13 @@ const Login: React.FC = () => {
       if (json.token) {
         AuthService.setToken({
           token: json.token,
-          refreshToken: json.refreshToken,
           expiresIn: json.expiresIn ? json.expiresIn * 1000 : undefined
         });
       }
 
       // redirect after login
       if (typeof window !== 'undefined' && (window as any).location) {
-        window.location.href = '/';
+        window.location.href = adminHomePath;
       }
     } catch (err: any) {
       setLoading(false);
@@ -58,7 +63,7 @@ const Login: React.FC = () => {
       <SEO
         title="Login | Naana's Kitchen"
         description="Area riservata per i partner di Naana's Kitchen. Accedi per gestire i prodotti e gli ordini."
-        url="https://naanaskitchen.com/login"
+        url={adminLoginUrl}
         type="website"
       />
       <main style={styles.root}>

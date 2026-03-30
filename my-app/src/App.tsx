@@ -1,10 +1,11 @@
 import React, { useState, Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './pages/Header';
 import Footer from './pages/Footer';
 import Homepage from './pages/Homepage';
 import { useSessionSecurity } from './hooks/useSessionSecurity';
 import AuthService from './services/AuthService';
+import { getAdminLoginPath, isAdminHost, redirectToAdminLogin } from './services/adminAccess';
 
 // Lazy-load non-homepage routes
 const Contatti = lazy(() => import('./pages/Contact'));
@@ -60,6 +61,8 @@ const SessionWarning: React.FC<{ show: boolean; onContinue: () => void }> = ({ s
 
 const App: React.FC = () => {
   const [showSessionWarning, setShowSessionWarning] = useState(false);
+  const adminLoginPath = getAdminLoginPath();
+  const adminHostEnabled = isAdminHost();
 
   useSessionSecurity({
     timeoutMs: 30 * 60 * 1000, // 30 minuti
@@ -72,7 +75,7 @@ const App: React.FC = () => {
     },
     onTimeout: () => {
       AuthService.logout().finally(() => {
-        window.location.href = '/login';
+        redirectToAdminLogin();
       });
     }
   });
@@ -92,9 +95,10 @@ const App: React.FC = () => {
             <Route path="/" element={<Homepage />} />
             <Route path="/contact" element={<Contatti />} />
             <Route path="/about" element={<About />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin/products" element={<EditProducts />} />
-            <Route path="/admin/orders" element={<ManageOrders />} />
+            <Route path={adminLoginPath} element={adminHostEnabled ? <Login /> : <Navigate to="/" replace />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route path="/admin/products" element={adminHostEnabled ? <EditProducts /> : <Navigate to="/" replace />} />
+            <Route path="/admin/orders" element={adminHostEnabled ? <ManageOrders /> : <Navigate to="/" replace />} />
           </Routes>
           </Suspense>
         </main>

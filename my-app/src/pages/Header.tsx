@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
 import AuthService from "../services/AuthService";
 import logoImg from "../assets/logo.jpg";
+import { isAdminHost } from '../services/adminAccess';
 
 type NavLink = { label: string; href: string };
 
@@ -15,6 +16,7 @@ const Header: React.FC<HeaderProps> = ({
     const { t, i18n } = useTranslation();
     const [isAuthed, setIsAuthed] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const adminHostEnabled = isAdminHost();
     useEffect(() => {
         setIsAuthed(AuthService.isAuthenticated());
         const onStorage = () => setIsAuthed(AuthService.isAuthenticated());
@@ -61,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({
 
                 {/* auth controls (login/admin) -- language moved to the right */}
                 <div style={styles.authRow} className="header-auth-row">
-                    {isAuthed ? (
+                    {isAuthed && adminHostEnabled ? (
                         <>
                             <a href="/admin/products" style={styles.adminButton} className="auth-btn">
                                 Modifica Prodotti
@@ -77,9 +79,7 @@ const Header: React.FC<HeaderProps> = ({
                             </button>
                         </>
                     ) : (
-                        <a href="/login" style={styles.loginButton}>
-                            {t('auth.login')}
-                        </a>
+                        <></>
                     )}
 
                     {/* Desktop language selector: placed to the right of login */}

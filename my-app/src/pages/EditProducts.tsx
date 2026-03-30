@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 import SecureHttpClient from '../services/SecureHttpClient';
+import { getAdminLoginPath } from '../services/adminAccess';
 
 type Item = {
   id?: string;
@@ -19,6 +20,7 @@ const EditProducts: React.FC = () => {
   const [editing, setEditing] = useState<Item | null>(null);
 
   const navigate = useNavigate();
+  const adminLoginPath = getAdminLoginPath();
 
   useEffect(() => {
     // SecureHttpClient will handle auth checking
@@ -31,7 +33,7 @@ const EditProducts: React.FC = () => {
       const res = await SecureHttpClient.get('/items');
       if (!res.ok) {
         if (res.status === 401) {
-          navigate('/login');
+          navigate(adminLoginPath);
         }
         return;
       }
@@ -56,7 +58,7 @@ const EditProducts: React.FC = () => {
     try {
       const res = await SecureHttpClient.delete(`/items/${id}`);
       if (res.status === 401) {
-        navigate('/login');
+        navigate(adminLoginPath);
         return;
       }
       fetchItems();
@@ -83,7 +85,7 @@ const EditProducts: React.FC = () => {
       try {
         const res = await SecureHttpClient.fetchFormData(endpoint, formData, { method: method as any });
         if (res.status === 401) {
-          navigate('/login');
+          navigate(adminLoginPath);
           return;
         }
         setEditing(null);
@@ -108,7 +110,7 @@ const EditProducts: React.FC = () => {
     try {
       const res = await SecureHttpClient[method.toLowerCase() as 'put' | 'post'](endpoint, payload);
       if (res.status === 401) {
-        navigate('/login');
+        navigate(adminLoginPath);
         return;
       }
       setEditing(null);
@@ -293,7 +295,7 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
             <div key={url} style={{ position: 'relative' }}>
               {!removedUrls.includes(url) && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <img src={url} alt="img" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 6 }} />
+                  <img src={url} alt="img" style={{ width: 96, height: 72, objectFit: 'contain', borderRadius: 6, background: '#fff' }} />
                   <button type="button" onClick={() => removeExisting(url)} style={{ marginTop: 6, fontSize: 12, color: 'white' }}>Rimuovi</button>
                 </div>
               )}
@@ -310,7 +312,7 @@ function EditForm({ editing, setEditing, saveEdit, cancelEdit }: {
         <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
           {newFiles.map((f, i) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <img src={URL.createObjectURL(f)} alt={f.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 6 }} />
+              <img src={URL.createObjectURL(f)} alt={f.name} style={{ width: 96, height: 72, objectFit: 'contain', borderRadius: 6, background: '#fff' }} />
               <button type="button" onClick={() => removeNewFile(i)} disabled={isCompressing} style={{ marginTop: 6, fontSize: 12, color: 'white' }}>Rimuovi</button>
             </div>
           ))}

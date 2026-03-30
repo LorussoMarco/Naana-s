@@ -10,7 +10,6 @@ const TOKEN_BUFFER = 5 * 60 * 1000; // Refresh 5 minuti prima della scadenza
 
 interface AuthTokenPayload {
   token: string;
-  refreshToken?: string;
   expiresIn?: number;
 }
 
@@ -31,9 +30,8 @@ export class AuthService {
         localStorage.setItem(EXPIRY_KEY, expiry.toString());
       }
 
-      if (payload.refreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, payload.refreshToken);
-      }
+      // Refresh token is now stored server-side in HttpOnly cookie.
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
     } catch (e) {
       console.error('Failed to store token:', e);
     }
@@ -67,15 +65,12 @@ export class AuthService {
   static async refreshToken(): Promise<boolean> {
     try {
       const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-      if (!refreshToken) {
-        this.clearAuth();
-        return false;
-      }
-
       const response = await fetch(`${this.apiBase}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken })
+        credentials: 'include',
+        // Backward compatibility: send legacy refresh token only if it exists.
+        body: JSON.stringify(refreshToken ? { refreshToken } : {})
       });
 
       if (!response.ok) {
@@ -138,7 +133,8 @@ export class AuthService {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
-          }
+          },
+          credentials: 'include'
         }).catch(() => {
           // Logout still happens even if server call fails
         });

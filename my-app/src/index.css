@@ -14,7 +14,7 @@
 
   /* Theme variables - refined palette */
   --inkcloud: #1f2937; /* deep slate for text */
-  --muted: #f7f5f3; /* soft warm background */
+  --muted: #f8f6f1; /* soft pearl background */
   --surface: #ffffff; /* card surface */
 
   /* Accent (brand) */
@@ -51,14 +51,16 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: linear-gradient(180deg, var(--muted), #fff);
+  background: linear-gradient(180deg, #fbf9f5 0%, var(--muted) 55%, #fdfcf9 100%);
   font-family: var(--font-sans);
 }
 
 #root {
   height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(180deg, #fbf9f5 0%, var(--muted) 55%, #fdfcf9 100%);
 }
 
 h1 {
@@ -77,10 +79,13 @@ button {
   font-family: inherit;
   background-color: var(--inkcloud);
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: transform 180ms ease, box-shadow 220ms ease, border-color 180ms ease, filter 180ms ease;
 }
 button:hover {
-  border-color: rgba(16,24,40,0.06);
+  border-color: rgba(16,24,40,0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(31,41,55,0.16) !important;
+  filter: saturate(1.02);
 }
 button.primary {
   background: linear-gradient(90deg,var(--accent),var(--accent-600));
@@ -88,7 +93,22 @@ button.primary {
   border: none;
   box-shadow: 0 8px 30px rgba(109,40,217,0.12);
 }
-button.primary:hover { transform: translateY(-1px); }
+button.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(109,40,217,0.2) !important;
+}
+button:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  button:hover,
+  button:active {
+    transition: none;
+    transform: none;
+  }
+}
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;

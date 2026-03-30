@@ -33,18 +33,13 @@ interface GalleryItemProps {
 
 const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => {
   const photo = item.photos && item.photos[0];
-  const src = photo?.md || photo?.url || bImg;
-  const srcSet = photo?.sm && photo?.md && photo?.lg
-    ? `${photo.sm} 400w, ${photo.md} 800w, ${photo.lg} 1200w`
-    : undefined;
+  const src = photo?.url || photo?.md || photo?.sm || photo?.lg || bImg;
 
   return (
     <div className="gallery-item">
       <div className="gallery-image-wrapper">
         <img 
           src={src}
-          srcSet={srcSet}
-          sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"
           alt={item.name || 'Prodotto'} 
           className="gallery-image"
           loading="lazy"
@@ -286,17 +281,19 @@ const Prodotti: React.FC = () => {
 
         .gallery-image-wrapper {
           width: 100%;
-          height: 200px;
+          aspect-ratio: 4 / 3;
+          height: auto;
           overflow: hidden;
           border-radius: 12px;
           margin-bottom: 16px;
           contain: layout paint;
+          background: #fff;
         }
 
         .gallery-image {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
           display: block;
           transition: none;
           will-change: auto;
@@ -339,10 +336,6 @@ const Prodotti: React.FC = () => {
             padding: 16px;
           }
 
-          .gallery-image-wrapper {
-            height: 160px;
-          }
-
           .gallery-item-name {
             font-size: 16px;
           }
@@ -364,9 +357,6 @@ const Prodotti: React.FC = () => {
             padding: 12px;
           }
 
-          .gallery-image-wrapper {
-            height: 140px;
-          }
         }
 
         /* Vecchi stili productStrip (commentati)

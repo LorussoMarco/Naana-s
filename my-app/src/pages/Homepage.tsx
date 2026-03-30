@@ -42,18 +42,13 @@ interface GalleryItemProps {
 
 const GalleryItem = React.memo(({ item, bImg }: GalleryItemProps) => {
   const photo = item.photos && item.photos[0];
-  const src = photo?.md || photo?.url || bImg;
-  const srcSet = photo?.sm && photo?.md && photo?.lg
-    ? `${photo.sm} 400w, ${photo.md} 800w, ${photo.lg} 1200w`
-    : undefined;
+  const src = photo?.url || photo?.md || photo?.sm || photo?.lg || bImg;
 
   return (
     <div className="homepage-gallery-item">
       <div className="homepage-gallery-image-wrapper">
         <img 
           src={src} 
-          srcSet={srcSet}
-          sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"
           alt={item.name || 'Prodotto'} 
           className="homepage-gallery-image"
           loading="lazy"
@@ -323,12 +318,14 @@ const Homepage: React.FC = () => {
         type="website"
         schema={localBusinessSchema}
       />
-      <main style={styles.root}>
-      <header style={styles.hero}>
-        <div style={styles.heroInner}>
-          <div style={styles.heroText}>
-            <h1 style={styles.title}>{t('homepage.hero_title')}</h1>
-            <p style={styles.lead}>{t('homepage.hero_lead')}</p>
+      <main style={styles.root} className="homepage-root">
+      <header style={styles.hero} className="homepage-hero">
+        <div style={styles.heroInner} className="homepage-hero-inner">
+          <div style={styles.heroText} className="homepage-hero-text">
+            <h1 style={styles.title} className="homepage-hero-title">{t('homepage.hero_title')}</h1>
+            <br />
+            <br />
+            <p style={styles.lead} className="homepage-hero-lead">{t('homepage.hero_lead')}</p>
           </div>
         </div>
       </header>
@@ -350,23 +347,17 @@ const Homepage: React.FC = () => {
       {showStepper && (
         <div style={overlayStyle} onClick={() => setShowStepper(false)}>
           <div role="dialog" aria-modal="true" style={modalStyle} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <button
-                aria-label={t('homepage.close')}
-                onClick={() => setShowStepper(false)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  fontSize: 20,
-                  cursor: 'pointer',
-                  color: '#444'
-                }}
-              >
-                ×
-              </button>
-            </div>
-
-            <div style={{ width: 'min(860px, 96vw)', padding: 8 }}>
+            <div className="stepper-shell" style={{ width: 'min(860px, 96vw)', padding: 8, margin: '0 auto' }}>
+              <div className="stepper-close-row">
+                <button
+                  type="button"
+                  className="stepper-close-button"
+                  aria-label={t('homepage.close')}
+                  onClick={() => setShowStepper(false)}
+                >
+                  X
+                </button>
+              </div>
               <Suspense fallback={<div style={{ textAlign: 'center', padding: 40, color: '#666' }}>Caricamento...</div>}>
               <LazyStepper
                 initialStep={1}
@@ -677,7 +668,7 @@ const Homepage: React.FC = () => {
           </div>
 
           {/* Review submission toggle */}
-          <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <div className="reviews-form-toggle" style={{ textAlign: 'center', marginTop: 32 }}>
             {!showReviewForm ? (
               <button
                 onClick={() => setShowReviewForm(true)}
@@ -686,9 +677,9 @@ const Homepage: React.FC = () => {
                 {t('reviews.write_review')}
               </button>
             ) : (
-              <div style={{ maxWidth: 500, margin: '0 auto', textAlign: 'left', background: '#fff', padding: 24, borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+              <div className="reviews-form-card" style={{ maxWidth: 500, margin: '0 auto', textAlign: 'left', background: '#fff', padding: 24, borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
                 <h3 style={{ marginTop: 0, marginBottom: 16 }}>{t('reviews.form_title')}</h3>
-                <div style={{ display: 'grid', gap: 10 }}>
+                <div className="reviews-form-fields" style={{ display: 'grid', gap: 10 }}>
                   <input
                     placeholder={t('reviews.name_placeholder')}
                     value={reviewName}
@@ -703,13 +694,13 @@ const Homepage: React.FC = () => {
                   />
                   <div>
                     <label style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('reviews.rating_label')}</label>
-                    <div style={{ display: 'flex', gap: 4 }}>
+                    <div className="reviews-rating-row" style={{ display: 'flex', gap: 4 }}>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           type="button"
                           onClick={() => setReviewRating(star)}
-                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 24, color: star <= reviewRating ? '#d4a574' : '#ddd' }}
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 24, lineHeight: 1, padding: '2px 6px', color: star <= reviewRating ? '#d4a574' : '#ddd' }}
                         >
                           ★
                         </button>
@@ -724,7 +715,7 @@ const Homepage: React.FC = () => {
                     maxLength={500}
                     style={{ padding: '10px 12px', borderRadius: 6, border: '1px solid #ddd', resize: 'vertical' }}
                   />
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="reviews-actions" style={{ display: 'flex', gap: 8 }}>
                     <button
                       onClick={handleReviewSubmit}
                       disabled={reviewSubmitting}
@@ -768,12 +759,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     maxWidth: 1100,
     margin: '0 auto',
     display: 'grid',
-    gridTemplateColumns: '1fr 480px',
-    gap: 32,
+    gridTemplateColumns: '1fr',
+    gap: 0,
     alignItems: 'center',
   },
   heroText: {
-    paddingRight: 12,
+    paddingRight: 0,
+    maxWidth: 680,
   },
   title: {
     margin: 0,
@@ -796,7 +788,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: 'auto',
     borderRadius: 12,
     boxShadow: '0 6px 18px rgba(16,24,40,0.06)',
-    // objectFit rimosso per mostrare l'immagine nella sua forma originale
+    objectFit: 'contain',
   },
   scrollNav: {
     position: 'sticky',
@@ -941,9 +933,10 @@ const styles: { [key: string]: React.CSSProperties } = {
   coverLeftImg: {
     width: '100%',
     height: '100%',
-    objectFit: 'cover' as const,
+    objectFit: 'contain' as const,
     objectPosition: 'center',
     display: 'block',
+    background: '#fff',
   },
   coverRight: {
     padding: '48px 32px',

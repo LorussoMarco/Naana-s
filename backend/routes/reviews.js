@@ -1,6 +1,6 @@
 const express = require('express');
 const supabase = require('../supabaseClient');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // ─── Rate limiting for review submissions ───────────────────
@@ -111,7 +111,7 @@ router.post('/', async (req, res) => {
 });
 
 // ─── PROTECTED: Get all reviews (admin) ─────────────────────
-router.get('/all', verifyToken, async (req, res) => {
+router.get('/all', verifyToken, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('reviews')
@@ -125,7 +125,7 @@ router.get('/all', verifyToken, async (req, res) => {
 });
 
 // ─── PROTECTED: Approve/reject review ───────────────────────
-router.put('/:id', verifyToken, async (req, res) => {
+router.put('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const { approved } = req.body || {};
@@ -146,7 +146,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 });
 
 // ─── PROTECTED: Delete review ───────────────────────────────
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const { error } = await supabase.from('reviews').delete().eq('id', id);

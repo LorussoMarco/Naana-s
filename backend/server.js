@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const supabase = require('./supabaseClient');
 const userRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
@@ -10,6 +11,11 @@ const clientRoutes = require('./routes/clients');
 const contactRoutes = require('./routes/contact');
 
 const app = express();
+
+// Trust reverse proxy in production for correct req.ip extraction.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 
 // Security headers with Helmet-like approach
 app.use((req, res, next) => {
@@ -48,6 +54,11 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .map((o) => o.trim())
   .filter(Boolean);
 
+const adminOrigin = (process.env.ADMIN_ORIGIN || '').trim();
+if (adminOrigin && !allowedOrigins.includes(adminOrigin)) {
+  allowedOrigins.push(adminOrigin);
+}
+
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
@@ -71,6 +82,7 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ limit: '2mb', extended: true }));
+app.use(cookieParser());
 
 // Health check for DB connectivity — no user data exposed
 app.get('/db-health', async (req, res) => {

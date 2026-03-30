@@ -1,6 +1,6 @@
 const express = require('express');
 const supabase = require('../supabaseClient');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Whitelist of allowed fields for order creation / update
@@ -37,7 +37,7 @@ async function attachClientsToOrders(orders) {
 // ─── PROTECTED routes (admin only) ──────────────────────────
 
 // List orders
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', verifyToken, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     if (error) return res.status(500).json({ error: error.message });
@@ -49,7 +49,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Get single order (with client info)
-router.get('/:id', verifyToken, async (req, res) => {
+router.get('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const { data, error } = await supabase.from('orders').select('*').eq('id', id).limit(1);
@@ -104,7 +104,7 @@ router.post('/', async (req, res) => {
 // ─── PROTECTED routes (admin only) ──────────────────────────
 
 // Update order
-router.put('/:id', verifyToken, async (req, res) => {
+router.put('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     let payload = req.body || {};
@@ -132,7 +132,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 });
 
 // Delete order
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const { error } = await supabase.from('orders').delete().eq('id', id);

@@ -1,6 +1,6 @@
 const express = require('express');
 const supabase = require('../supabaseClient');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin } = require('../middleware/auth');
 const multer = require('multer');
 const sharp = require('sharp');
 
@@ -215,7 +215,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create item (protected) — supports multipart/form-data with files in `images` field
-router.post('/', verifyToken, upload.array('images'), async (req, res) => {
+router.post('/', verifyToken, requireAdmin, upload.array('images'), async (req, res) => {
   try {
     const payload = req.body || {};
     
@@ -279,7 +279,7 @@ router.post('/', verifyToken, upload.array('images'), async (req, res) => {
 
 // Update item (protected) — supports multipart/form-data with files in `images` field
 // Kept existing images should be sent in `keptImages` field as JSON string
-router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
+router.put('/:id', verifyToken, requireAdmin, upload.array('images'), async (req, res) => {
   try {
     const id = req.params.id;
     const payload = req.body || {};
@@ -352,7 +352,7 @@ router.put('/:id', verifyToken, upload.array('images'), async (req, res) => {
 });
 
 // Delete item (protected)
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const { error } = await supabase.from('items').delete().eq('id', id);

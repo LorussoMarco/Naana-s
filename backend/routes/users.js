@@ -1,14 +1,14 @@
 const express = require('express');
 const supabase = require('../supabaseClient');
 const bcrypt = require('bcryptjs');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Safe fields — NEVER return password hashes
 const SAFE_USER_FIELDS = 'id, email, created_at';
 
-// ALL user routes require authentication
-router.use(verifyToken);
+// Users management is restricted to admins.
+router.use(verifyToken, requireAdmin);
 
 // List users
 router.get('/', async (req, res) => {
@@ -67,15 +67,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update user (only own account, whitelist fields)
+// Update user (admin-managed)
 router.put('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-
-    // Users can only update their own account
-    if (String(req.user.id) !== String(id)) {
-      return res.status(403).json({ error: 'Non puoi modificare un altro utente' });
-    }
 
     const { email, password } = req.body || {};
     const updatePayload = {};
@@ -106,14 +101,10 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete user (only own account)
+// Delete user (admin-managed)
 router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-
-    if (String(req.user.id) !== String(id)) {
-      return res.status(403).json({ error: 'Non puoi eliminare un altro utente' });
-    }
 
     const { error } = await supabase.from('users').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });

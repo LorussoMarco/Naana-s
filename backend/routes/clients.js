@@ -1,6 +1,6 @@
 const express = require('express');
 const supabase = require('../supabaseClient');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Whitelist of allowed client fields
@@ -17,7 +17,7 @@ function pickAllowed(obj, allowedKeys) {
 // ─── PROTECTED routes (admin only) ──────────────────────────
 
 // List clients
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', verifyToken, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('clients').select('*').order('created_at', { ascending: false });
     if (error) return res.status(500).json({ error: error.message });
@@ -28,7 +28,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Get single client
-router.get('/:id', verifyToken, async (req, res) => {
+router.get('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const { data, error } = await supabase.from('clients').select('*').eq('id', id).limit(1);
@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
 // ─── PROTECTED routes (admin only) ──────────────────────────
 
 // Update client (whitelisted fields)
-router.put('/:id', verifyToken, async (req, res) => {
+router.put('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const safePayload = pickAllowed(req.body || {}, CLIENT_ALLOWED_FIELDS);
@@ -80,7 +80,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 });
 
 // Delete client
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const { error } = await supabase.from('clients').delete().eq('id', id);
